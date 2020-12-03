@@ -13,28 +13,43 @@ class apiResponse:
         self.category2 = category2
 
     def category(self):
-        param = {}
-        param['category_l'] = self.category1
-        param['category_s'] = self.category2
+        category = {}
+        category['category_l'] = self.category1
+        category['category_s'] = self.category2
         
-        return param
+        return category
     
     def geolocation(self):
-        param = {}
-        param['latitude'] = self.latitude
-        param['longitude'] = self.longitude
+        geolocation = {}
+        geolocation['latitude'] = self.latitude
+        geolocation['longitude'] = self.longitude
 
-        return param
+        return geolocation
+
+    def current_page(self):
+        current_page = {}
+        current_page['offset_page'] = 1
+
+        return current_page
+    
+    def range(self):
+        range = {}
+        range['range'] = 1
+
+        return range
         
     def api_parameter(self):
-        param = {
+        parameter = {
             "keyid": self.keyid,
-            "offset_page": 1,
-            "range": 1
         }
-        param.update(**self.geolocation(), **self.category())
+        parameter.update(
+            **self.geolocation(), 
+            **self.category(), 
+            **self.current_page(), 
+            **self.range()
+            )
         
-        return param
+        return parameter
 
     def api_request(self):
         param = self.api_parameter()
@@ -55,20 +70,19 @@ class apiResponse:
         return total_page
 
     def shop_info(self):
-        res = self.api_request()
-        
+        shop_data = self.api_request()     
         total_page = self.total_page()
         page = 1
 
         shopinfo = {}
         while total_page >= page:
-            for shop in res['rest']:
+            for shop in shop_data['rest']:
                 shopinfo[shop['name']] = shop['name_kana']
             page += 1
             param = self.api_parameter()
             param['offset_page'] = page
             response = requests.get(self.url, params=param)
-            res = response.json()
+            shop_data = response.json()
 
         return shopinfo
 
