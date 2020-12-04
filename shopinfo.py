@@ -3,10 +3,82 @@ import json
 import math
 import os
 
+class baseInfo:
+    def __init__(self):
+        self.url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
+        self.keyid = "apikey"
+
+    def baseinfo(self):
+        baseinfo = {}
+        baseinfo['keyid'] = self.keyid
+        baseinfo['url'] = self.url
+
+        return baseinfo
+
+class category:
+    def __init__(self, category1, category2):
+        self.category1 = category1
+        self.category2 = category2
+
+    def category(self):
+        category = {}
+        category['category_l'] = self.category1
+        category['category_s'] = self.category2
+        
+        return category
+
+class geoLocation:
+    def __init__(self, latitude, longitude):
+        self.latitude = latitude
+        self.longitude = longitude
+
+    def geolocation(self):
+        geolocation = {}
+        geolocation['latitude'] = self.latitude
+        geolocation['longitude'] = self.longitude
+
+        return geolocation    
+
+class menu:
+    def __init__(self, menu):
+        self.menu = menu
+    
+#    def menu(self):
+#        menu = {}
+#        menu['menu_name'] = menu 
+
+#        return menu
+
+class mergeParam:
+    def __init__(self):
+        pass
+
+    def api_parameter(self, *args):
+        '''複数の辞書をマージする関数'''
+        parameter = {}
+        print(args)
+        
+        for i in args:
+            parameter.update(**i)
+        
+        return parameter
+
+param = baseInfo()
+print(param.baseinfo())
+
+param2 = geoLocation('50', '100')
+print(param2.geolocation())
+
+
+param3 = mergeParam()
+mergeparam = param3.api_parameter(param.baseinfo(), param2.geolocation())
+print(mergeparam)
+
+'''
 class apiResponse:
     def __init__(self, latitude, longitude, category1, category2):
         self.url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
-        self.keyid = os.env['API_KEY']
+        self.keyid = "apikey"
         self.latitude = latitude
         self.longitude = longitude
         self.category1 = category1
@@ -37,11 +109,13 @@ class apiResponse:
         range['range'] = 1
 
         return range
-        
+
     def api_parameter(self):
         parameter = {
             "keyid": self.keyid,
+
         }
+        
         parameter.update(
             **self.geolocation(), 
             **self.category(), 
@@ -86,13 +160,16 @@ class apiResponse:
 
         return shopinfo
 
-shopsearch = apiResponse("43.0555316", "141.3526345", 'RSFST08000', 'RSFST08008')
+'''
 
-hit_count = shopsearch.hit_count()
-total_page = shopsearch.total_page()
-shop_info = shopsearch.shop_info()
 
-print(hit_count)
-print(total_page)
-print(shop_info)
 
+#shopsearch = apiResponse("43.0555316", "141.3526345", 'RSFST08000', 'RSFST08008')
+
+#hit_count = shopsearch.hit_count()
+#total_page = shopsearch.total_page()
+#shop_info = shopsearch.shop_info()
+
+#print(hit_count)
+#print(total_page)
+#print(shop_info)
