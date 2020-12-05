@@ -130,38 +130,41 @@ class kuchikomiInfo(apiRequest):
     def shop_info(self):
         shop_data2 = self.api_request()
         shop_data = shop_data2['response']
+#        print(shop_data)
         per_page = shop_data['hit_per_page']
         total_page = self.total_page2()
+        print('total page is ' + str(total_page))
+        hit_count = self.hit_count2()
+        print('hit count is ' + str(hit_count))
         page = 1
 
         kuchikomiinfo = {}
+        nokori = hit_count - (per_page * page)
 
-        for i in range(per_page):
-            kuchikomiinfo[shop_data[str(i)]['photo']['shop_name']] = shop_data[str(i)]['photo']['comment']
-#            print(shop_data[str(i)]['photo']['shop_name'])
-#            kuchikomiinfo['shop_name'] = shop_data[str(i)]['photo']['shop_name']
-        
-        print(kuchikomiinfo)
-        return kuchikomiinfo
-
-'''
-        while total_page >= page:
-            for i in range(0, per_page):
+        while hit_count - (per_page * page) > 0:
+            print('nokori is ' + str(nokori))
+            print('全部表示する')
+            for i in range(per_page):
+                kuchikomiinfo[shop_data[str(i)]['photo']['shop_name']] = shop_data[str(i)]['photo']['comment']
+                print(i)
                 print(shop_data[str(i)]['photo']['shop_name'])
-                kuchikomiinfo['shop_name'] = shop_data[str(i)]['photo']['shop_name']
-
             page += 1
             param = self.param
             param['offset_page'] = page
+            print(param)
+            print(url)
             response = requests.get(self.url, params=param)
-            shop_data2 = response.json()
-#            print(shop_data2)
-        
-        print(kuchikomiinfo)
-#            shop_data = shop_data2['response']
-
+            shop_data3 = response.json()
+            shop_data = shop_data3['response']
+        else:
+            nokori2 = hit_count - (per_page * (page-1))
+            print('nokori2 is ' + str(nokori2))
+            print('残りだけ表示する')
+            for i in range(nokori2):
+                print(i)
+                print(shop_data[str(i)]['photo']['shop_name'])
+            
         return kuchikomiinfo    
-'''
 
 #param1 = restrantApi('RSFST08000', 'RSFST08008')
 param1 = kuchikomiApi('ラーメン')
