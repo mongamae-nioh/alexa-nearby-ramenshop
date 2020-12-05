@@ -3,10 +3,12 @@ import json
 import math
 import os
 
+keyid = "apikey"
+
 class restrantApi:
     def __init__(self, category1, category2):
         self.url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
-        self.keyid = "apikey"
+        self.keyid = keyid
         self.category1 = category1
         self.category2 = category2
         
@@ -21,7 +23,7 @@ class restrantApi:
 class reputationApi:
     def __init__(self, menu):
         self.url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
-        self.keyid = "apikey"
+        self.keyid = keyid
         self.menu = menu
     
     def baseinfo(self):
@@ -45,8 +47,8 @@ class geoLocation:
 
 class mergeApiParameter:
     '''APIリクエストのパラメータとして使うために複数の辞書をマージするクラス'''
-    def __init__(self):
-        pass
+#    def __init__(self):
+#        pass
 
     def api_parameter(self, *args):
         parameter = {}
@@ -150,8 +152,8 @@ class reputationInfo(apiRequest):
             
         return reputation_info    
 
-#param1 = restrantApi('RSFST08000', 'RSFST08008')
-param1 = reputationApi('ラーメン')
+param1 = restrantApi('RSFST08000', 'RSFST08008')
+#param1 = reputationApi('ラーメン')
 apibase = param1.baseinfo()
 
 param2 = geoLocation("43.0555316", "141.3526345")
@@ -162,9 +164,10 @@ param = merge.api_parameter(apibase, geolocation)
 
 url = param1.url
 
-#shop = restrantInfo(url, param)
-shop = reputationInfo(url, param)
-shop2 = shop.reputation_search()
+shop = restrantInfo(url, param)
+#shop = reputationInfo(url, param)
+shop2 = shop.restrant_search()
+#shop2 = shop.reputation_search()
 print(shop2)
 
 #json = json.dumps(info, indent=4, ensure_ascii=False)
