@@ -91,7 +91,7 @@ class apiRequest:
         return range        
 
 class shopInfo(apiRequest):
-    def __init__(self):
+    def __init__(self, url, param):
         super().__init__(url, param)
     
     def shop_info(self):
@@ -111,33 +111,19 @@ class shopInfo(apiRequest):
 
         return shopinfo    
 
-
 param1 = restrantApi('RSFST08000', 'RSFST08008')
-#print(param.baseinfo())
+apibase = param1.baseinfo()
+
+param2 = geoLocation("43.0555316", "141.3526345")
+geolocation = param2.geolocation()
+
+merge = mergeApiParameter()
 
 url = param1.url
-param2 = geoLocation("43.0555316", "141.3526345")
-#print(param2.geolocation())
+param = merge.api_parameter(apibase, geolocation)
 
-
-param3 = mergeApiParameter()
-param = param3.api_parameter(param1.baseinfo(), param2.geolocation())
-#print(mergeparam)
-
-res1 = apiRequest(url, param)
-res2 = res1.api_request()
-#print(res2)
-
-hit_count = res1.hit_count()
-#print(hit_count)
-
-total_page = res1.total_page()
-#print(total_page)
-
-shop = shopInfo()
-
-#print('url is ' + shop.url)
-#print(shop.param)
-
+shop = shopInfo(url, param)
 shopinfo = shop.shop_info()
+hit_count = shop.hit_count()
+print(hit_count)
 print(shopinfo)
