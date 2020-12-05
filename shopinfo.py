@@ -3,18 +3,35 @@ import json
 import math
 import os
 
-class baseInfo:
-    def __init__(self):
+class restrantApi:
+    def __init__(self, category1, category2):
         self.url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
         self.keyid = "apikey"
-
+        self.category1 = category1
+        self.category2 = category2
+        
     def baseinfo(self):
         baseinfo = {}
         baseinfo['keyid'] = self.keyid
-        baseinfo['url'] = self.url
+        baseinfo['category_l'] = self.category1
+        baseinfo['category_s'] = self.category2
+        
+        return baseinfo
+
+class kuchikomiApi:
+    def __init__(self, menu):
+        self.url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
+        self.keyid = "apikey"
+        self.menu = menu
+    
+    def baseinfo(self):
+        baseinfo = {}
+        baseinfo['keyid'] = self.keyid
+        baseinfo['menu_name'] = self.menu
 
         return baseinfo
 
+'''
 class category:
     def __init__(self, category1, category2):
         self.category1 = category1
@@ -26,6 +43,7 @@ class category:
         category['category_s'] = self.category2
         
         return category
+'''
 
 class geoLocation:
     def __init__(self, latitude, longitude):
@@ -39,46 +57,56 @@ class geoLocation:
 
         return geolocation    
 
-class menu:
-    def __init__(self, menu):
-        self.menu = menu
-    
-#    def menu(self):
-#        menu = {}
-#        menu['menu_name'] = menu 
-
-#        return menu
-
-class mergeParam:
+class mergeApiParameter:
     def __init__(self):
         pass
 
     def api_parameter(self, *args):
-        '''複数の辞書をマージする関数'''
+        '''複数の辞書をマージするクラス'''
         parameter = {}
-        print(args)
+#        print(args)
         
         for i in args:
             parameter.update(**i)
         
         return parameter
 
-param = baseInfo()
-print(param.baseinfo())
+class apiResponse:
+    def __init__(self):
+        pass
+    
+    def api_request(self, url, param):
+#        self.param = param
+#        response = requests.get(self.url, params=param)
+        response = requests.get(url, params=param)
+#        print(param['url'])
+        print(param)
+                
+        return response.json()
 
-param2 = geoLocation('50', '100')
-print(param2.geolocation())
+
+param = restrantApi('RSFST08000', 'RSFST08008')
+#print(param.baseinfo())
+
+url = param.url
+param2 = geoLocation("43.0555316", "141.3526345")
+#print(param2.geolocation())
 
 
-param3 = mergeParam()
+param3 = mergeApiParameter()
 mergeparam = param3.api_parameter(param.baseinfo(), param2.geolocation())
 print(mergeparam)
+
+res1 = apiResponse()
+res2 = res1.api_request(url, mergeparam)
+
+print(res2)
 
 '''
 class apiResponse:
     def __init__(self, latitude, longitude, category1, category2):
         self.url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
-        self.keyid = "apikey"
+        self.keyid = "3c0d63c52a654ff92b9b98f3511235fe"
         self.latitude = latitude
         self.longitude = longitude
         self.category1 = category1
