@@ -143,9 +143,20 @@ class reputationInfo(apiRequest):
         page = 1
 
         reputation_info = {}
-
+        index = 0
         while hit_count - (page * per_page) > 0:
             for i in range(per_page):
+#                reputation_info.update({
+#                    index: {
+#                        shop_data[str(i)]['photo']['shop_name']: { 
+#                            "menu": shop_data[str(i)]['photo']['menu_name'],
+#                            "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
+#                            "score": shop_data[str(i)]['photo']['total_score'],
+#                            "distance": shop_data[str(i)]['photo']['distance'],
+#                            "url": shop_data[str(i)]['photo']['shop_url']
+#                        }
+#                    }})
+#                index += 1
                 reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
                         "menu": shop_data[str(i)]['photo']['menu_name'],
@@ -172,8 +183,25 @@ class reputationInfo(apiRequest):
                         "url": shop_data[str(i)]['photo']['shop_url']
                     }
                 })
+        
+        last_dict = {}
+        index = 0
+        for i,j in reputation_info.items():
+            last_dict.update({
+                index: {
+                    i : {
+                        "menu": reputation_info[i]['menu'],
+                        "comment": reputation_info[i]['comment'],
+                        "distance": reputation_info[i]['distance'],
+                        "url": reputation_info[i]['url']
+                    }
+                }
+            })
+            index += 1
+        
+        last = json.dumps(last_dict, indent=4, ensure_ascii=False)
+        print(last)
                 
-#        reputation_info = reputation_info.replace('\r\n', '')
         return reputation_info
 
 #param1 = restrantApi('RSFST08000', 'RSFST08008')
@@ -192,8 +220,14 @@ url = param1.url
 shop = reputationInfo(url, param)
 #shop2 = shop.restrant_search()
 shop2 = shop.reputation_search()
+#hitcount = shop.hit_count2()
 #print(shop2)
 
-json = json.dumps(shop2, indent=4, ensure_ascii=False)
-print(json)
+#for i,j in shop2.items():
+#    mojiretsu = i + 'の口コミです。'
+#    mojiretsu += j['comment'] + '現在地からの距離はおおよそ' + str(j['distance']) + 'メートルです。'
+#    print(mojiretsu)
 
+#print(hitcount)
+#json = json.dumps(shop2, indent=4, ensure_ascii=False)
+#print(json)
