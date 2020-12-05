@@ -104,6 +104,13 @@ class apiRequest:
 
         return range        
 
+class removeUnnecessaryCharactor:
+    def __init__(self, object):
+        self.object = object
+    
+    def remove_linefeed(self):
+        return self.object.replace('\r\n', '')
+
 class restrantInfo(apiRequest):
     def __init__(self, url, param):
         super().__init__(url, param)
@@ -141,9 +148,8 @@ class reputationInfo(apiRequest):
             for i in range(per_page):
                 reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
-#                        "name": shop_data[str(i)]['photo']['shop_name'],
                         "menu": shop_data[str(i)]['photo']['menu_name'],
-                        "comment": shop_data[str(i)]['photo']['comment'],
+                        "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
                         "score": shop_data[str(i)]['photo']['total_score'],
                         "distance": shop_data[str(i)]['photo']['distance'],
                         "url": shop_data[str(i)]['photo']['shop_url']
@@ -160,14 +166,15 @@ class reputationInfo(apiRequest):
                 reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
                         "menu": shop_data[str(i)]['photo']['menu_name'],
-                        "comment": shop_data[str(i)]['photo']['comment'],
+                        "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
                         "score": shop_data[str(i)]['photo']['total_score'],
                         "distance": shop_data[str(i)]['photo']['distance'],
                         "url": shop_data[str(i)]['photo']['shop_url']
                     }
                 })
-
-        return reputation_info    
+                
+#        reputation_info = reputation_info.replace('\r\n', '')
+        return reputation_info
 
 #param1 = restrantApi('RSFST08000', 'RSFST08008')
 param1 = reputationApi('ラーメン')
