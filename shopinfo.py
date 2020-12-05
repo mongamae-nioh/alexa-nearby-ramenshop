@@ -139,7 +139,16 @@ class reputationInfo(apiRequest):
 
         while hit_count - (page * per_page) > 0:
             for i in range(per_page):
-                reputation_info[shop_data[str(i)]['photo']['shop_name']] = shop_data[str(i)]['photo']['comment']
+                reputation_info.update({
+                    shop_data[str(i)]['photo']['shop_name']: { 
+#                        "name": shop_data[str(i)]['photo']['shop_name'],
+                        "menu": shop_data[str(i)]['photo']['menu_name'],
+                        "comment": shop_data[str(i)]['photo']['comment'],
+                        "score": shop_data[str(i)]['photo']['total_score'],
+                        "distance": shop_data[str(i)]['photo']['distance'],
+                        "url": shop_data[str(i)]['photo']['shop_url']
+                    }
+                })
             page += 1
             param = self.param
             param['offset_page'] = page
@@ -148,12 +157,20 @@ class reputationInfo(apiRequest):
         else:
             remaining = hit_count - ((page-1) * per_page)
             for i in range(remaining):
-                reputation_info[shop_data[str(i)]['photo']['shop_name']] = shop_data[str(i)]['photo']['comment']
-            
+                reputation_info.update({
+                    shop_data[str(i)]['photo']['shop_name']: { 
+                        "menu": shop_data[str(i)]['photo']['menu_name'],
+                        "comment": shop_data[str(i)]['photo']['comment'],
+                        "score": shop_data[str(i)]['photo']['total_score'],
+                        "distance": shop_data[str(i)]['photo']['distance'],
+                        "url": shop_data[str(i)]['photo']['shop_url']
+                    }
+                })
+
         return reputation_info    
 
-param1 = restrantApi('RSFST08000', 'RSFST08008')
-#param1 = reputationApi('ラーメン')
+#param1 = restrantApi('RSFST08000', 'RSFST08008')
+param1 = reputationApi('ラーメン')
 apibase = param1.baseinfo()
 
 param2 = geoLocation("43.0555316", "141.3526345")
@@ -164,12 +181,12 @@ param = merge.api_parameter(apibase, geolocation)
 
 url = param1.url
 
-shop = restrantInfo(url, param)
-#shop = reputationInfo(url, param)
-shop2 = shop.restrant_search()
-#shop2 = shop.reputation_search()
-print(shop2)
+#shop = restrantInfo(url, param)
+shop = reputationInfo(url, param)
+#shop2 = shop.restrant_search()
+shop2 = shop.reputation_search()
+#print(shop2)
 
-#json = json.dumps(info, indent=4, ensure_ascii=False)
-#print(json)
+json = json.dumps(shop2, indent=4, ensure_ascii=False)
+print(json)
 
