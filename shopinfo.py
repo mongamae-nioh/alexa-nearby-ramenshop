@@ -6,7 +6,7 @@ import os
 class restrantApi:
     def __init__(self, category1, category2):
         self.url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
-        self.keyid = "apikey"
+        self.keyid = "apikey
         self.category1 = category1
         self.category2 = category2
         
@@ -71,19 +71,31 @@ class mergeApiParameter:
         
         return parameter
 
-class apiResponse:
-    def __init__(self):
-        pass
+class apiRequest:
+    def __init__(self, url, param):
+        self.url = url
+        self.param = param
     
-    def api_request(self, url, param):
+#    def api_request(self, url, param):
+    def api_request(self):
 #        self.param = param
-#        response = requests.get(self.url, params=param)
-        response = requests.get(url, params=param)
+        response = requests.get(self.url, params=self.param)
+#        response = requests.get(url, params=param)
 #        print(param['url'])
-        print(param)
+#        print(param)
                 
         return response.json()
 
+    def hit_count(self):
+        res = self.api_request()
+        hitcount = res['total_hit_count']
+
+        return hitcount
+        
+    def total_page(self):
+        res = self.api_request()
+        total_page = math.ceil(res['total_hit_count'] / res['hit_per_page'])
+        
 
 param = restrantApi('RSFST08000', 'RSFST08008')
 #print(param.baseinfo())
@@ -97,13 +109,19 @@ param3 = mergeApiParameter()
 mergeparam = param3.api_parameter(param.baseinfo(), param2.geolocation())
 print(mergeparam)
 
-res1 = apiResponse()
-res2 = res1.api_request(url, mergeparam)
+res1 = apiRequest(url, mergeparam)
+res2 = res1.api_request()
 
 print(res2)
 
+hit_count = res1.hit_count()
+print(hit_count)
+
+total_page = res1.total_page()
+print(total_page)
+
 '''
-class apiResponse:
+class apiRequest:
     def __init__(self, latitude, longitude, category1, category2):
         self.url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
         self.keyid = "3c0d63c52a654ff92b9b98f3511235fe"
@@ -192,7 +210,7 @@ class apiResponse:
 
 
 
-#shopsearch = apiResponse("43.0555316", "141.3526345", 'RSFST08000', 'RSFST08008')
+#shopsearch = apiRequest("43.0555316", "141.3526345", 'RSFST08000', 'RSFST08008')
 
 #hit_count = shopsearch.hit_count()
 #total_page = shopsearch.total_page()
