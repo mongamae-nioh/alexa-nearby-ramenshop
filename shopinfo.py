@@ -7,14 +7,22 @@ keyid = "apikey"
 
 class restrantApi:
     def __init__(self, category1, category2):
-        self.url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
-        self.keyid = keyid
+        self._url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
+        self._keyid = keyid
         self.category1 = category1
         self.category2 = category2
+    
+    @property
+    def url(self):
+        return self._url
+
+    @property
+    def keyid(self):
+        return self._keyid
         
     def baseinfo(self):
         baseinfo = {}
-        baseinfo['keyid'] = self.keyid
+        baseinfo['keyid'] = self._keyid
         baseinfo['category_l'] = self.category1
         baseinfo['category_s'] = self.category2
         
@@ -22,13 +30,21 @@ class restrantApi:
 
 class reputationApi:
     def __init__(self, menu):
-        self.url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
-        self.keyid = keyid
+        self._url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
+        self._keyid = keyid
         self.menu = menu
-    
+
+    @property
+    def url(self):
+        return self._url
+
+    @property
+    def keyid(self):
+        return self._keyid
+
     def baseinfo(self):
         baseinfo = {}
-        baseinfo['keyid'] = self.keyid
+        baseinfo['keyid'] = self._keyid
         baseinfo['menu_name'] = self.menu
 
         return baseinfo
