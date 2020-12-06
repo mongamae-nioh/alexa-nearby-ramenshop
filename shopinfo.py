@@ -47,8 +47,6 @@ class geoLocation:
 
 class mergeApiParameter:
     '''APIリクエストのパラメータとして使うために複数の辞書をマージするクラス'''
-#    def __init__(self):
-#        pass
 
     def api_parameter(self, *args):
         parameter = {}
@@ -166,28 +164,27 @@ class reputationInfo(apiRequest):
                     }
                 })
         
+#        print(temp_reputation_info)
+        
         reputation_info = {}
         index = 0
-        for i in temp_reputation_info.items():
+        for i,j in temp_reputation_info.items():
             reputation_info.update({
                 index: {
-                    "name": temp_reputation_info[i]['name'],
-                    "menu": temp_reputation_info[i]['menu'],
-                    "comment": temp_reputation_info[i]['comment'],
-                    "distance": temp_reputation_info[i]['distance'],
-                    "url": temp_reputation_info[i]['url']
+                    "name": i,
+                    "menu": j['menu'],
+                    "comment": j['comment'],
+                    "distance": j['distance'],
+                    "url": j['url']
                     }
                 }
             )
             index += 1
         
-        last = json.dumps(reputation_info, indent=4, ensure_ascii=False)
-        print(last)
-                
         return reputation_info
 
-param1 = restrantApi('RSFST08000', 'RSFST08008')
-#param1 = reputationApi('ラーメン')
+#param1 = restrantApi('RSFST08000', 'RSFST08008')
+param1 = reputationApi('ラーメン')
 apibase = param1.baseinfo()
 
 param2 = geoLocation("43.0555316", "141.3526345")
@@ -198,12 +195,12 @@ param = merge.api_parameter(apibase, geolocation)
 
 url = param1.url
 
-shop = restrantInfo(url, param)
-#shop = reputationInfo(url, param)
-shop2 = shop.restrant_search()
-#shop2 = shop.reputation_search()
+#shop = restrantInfo(url, param)
+shop = reputationInfo(url, param)
+#shop2 = shop.restrant_search()
+shop2 = shop.reputation_search()
 #hitcount = shop.hit_count2()
-print(shop2)
+#print(shop2)
 
 #for i,j in shop2.items():
 #    mojiretsu = i + 'の口コミです。'
@@ -211,5 +208,5 @@ print(shop2)
 #    print(mojiretsu)
 
 #print(hitcount)
-#json = json.dumps(shop2, indent=4, ensure_ascii=False)
-#print(json)
+json = json.dumps(shop2, indent=4, ensure_ascii=False)
+print(json)
