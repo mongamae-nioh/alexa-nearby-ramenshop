@@ -29,7 +29,6 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-#        speak_output = "Welcome, you can say Hello or Help. Which would you like to try?"
         speak_output = "近くのラーメン屋さんをお知らせします。"
         
         return (
@@ -47,6 +46,16 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
+        context = handler_input.request_envelope.context
+        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
+        if isgeosupported:
+            print('geolocation is supported.')
+
+        latitude1 = context.geolocation.coordinate.latitude_in_degrees
+        print(latitude1)
+        longitude1 = context.geolocation.coordinate.longitude_in_degrees
+        print(longitude1)
+        
         param1 = shopinfo.reputationApi('ラーメン')
         apibase = param1.baseinfo()
         param2 = shopinfo.geoLocation("43.0555316", "141.3526345")
@@ -107,7 +116,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
             speak_output += "次の口コミを聞きますか？"
             session_attr['q'] = 'yes'
 
-            ask_output = "そのほかの口コミをを聞きますか？"
+            ask_output = "そのほかの口コミを聞きますか？"
 
             return (
                 handler_input.response_builder
