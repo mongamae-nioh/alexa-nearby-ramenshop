@@ -30,7 +30,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
 #        speak_output = "Welcome, you can say Hello or Help. Which would you like to try?"
-        speak_output = "お近くのラーメン屋さんをお知らせします。"
+        speak_output = "近くのラーメン屋さんをお知らせします。"
         
         return (
             handler_input.response_builder
@@ -38,7 +38,6 @@ class LaunchRequestHandler(AbstractRequestHandler):
                 .ask(speak_output)
                 .response
         )
-
 
 class HelloWorldIntentHandler(AbstractRequestHandler):
     """Handler for Hello World Intent."""
@@ -50,30 +49,73 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
         param1 = shopinfo.reputationApi('ラーメン')
         apibase = param1.baseinfo()
-#        param2 = shopinfo.geoLocation("43.0555316", "141.3526345")
-        param2 = shopinfo.geoLocation('43.058377961865624', '141.25509169734372')
+        param2 = shopinfo.geoLocation("43.0555316", "141.3526345")
+#        param2 = shopinfo.geoLocation('43.058377961865624', '141.25509169734372')
         geolocation = param2.geolocation()
         merge = shopinfo.mergeApiParameter()
         param = merge.api_parameter(apibase, geolocation)
         url = param1.url
+
         #shop = restrantInfo(url, param)
         shop = shopinfo.reputationInfo(url, param)
+
         hitcount = shop.hit_count2()
         shop2 = shop.reputation_search()
+        
+        session_attr = handler_input.attributes_manager.session_attributes
+        
+        if shop2:
+            speak_output = f"{hitcount}件の口コミが見つかりました。"
+        else:
+            speak_output = '近くには見つかりませんでした。範囲を広げて探しましょうか？'
+            ask_output = "範囲を広げて探しますか？"
+            session_attr['shop'] = 'no'
 
-        speak_output = f"{hitcount}件の口コミをご紹介します。"
-
-        for i in range(3):
-            speak_output += shop2[i]['name'] + '。'
-            speak_output += shop2[i]['comment'] + 'お店までの距離はここから約' + str(shop2[i]['distance']) + 'メートルです。'            
-
-        return (
-            handler_input.response_builder
+            return (
+                handler_input.response_builder
                 .speak(speak_output)
-                # .ask("add a reprompt if you want to keep the session open for the user to respond")
+                .ask(ask_output)
+                .set_should_end_session(False)
                 .response
-        )
+                )
 
+        session_attr['start'] = 0
+
+        if len(shop2) < 3:
+            session_attr['next'] = 'no'
+            session_attr['q'] = 'no'
+
+            for i in range(len(shop2)):
+                speak_output += shop2[i]['name'] + '。'
+                speak_output += shop2[i]['comment'] + 'お店までの距離はここから約' + str(shop2[i]['distance']) + 'メートルです。'
+                
+            return (
+                handler_input.response_builder
+                .speak(speak_output)
+                .response
+                )
+        else:
+            speak_output += 'いくつかをご紹介します。'
+            for i in range(2):
+                speak_output += shop2[i]['name'] + '。'
+                speak_output += shop2[i]['comment'] + 'お店まではここから約' + str(shop2[i]['distance']) + 'メートルです。'
+                
+                session_attr['next'] = 'yes'
+                session_attr['start'] += 1
+
+            session_attr['end'] = session_attr['start'] + 2
+            speak_output += "次の口コミを聞きますか？"
+            session_attr['q'] = 'yes'
+
+            ask_output = "そのほかの口コミをを聞きますか？"
+
+            return (
+                handler_input.response_builder
+                .speak(speak_output)
+                .ask(ask_output)
+                .set_should_end_session(False)
+                .response
+                )
 
 class HelpIntentHandler(AbstractRequestHandler):
     """Handler for Help Intent."""
@@ -91,7 +133,6 @@ class HelpIntentHandler(AbstractRequestHandler):
                 .ask(speak_output)
                 .response
         )
-
 
 class CancelOrStopIntentHandler(AbstractRequestHandler):
     """Single handler for Cancel and Stop Intent."""
