@@ -29,6 +29,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
+#        speak_output = "Welcome, you can say Hello or Help. Which would you like to try?"
         speak_output = "近くのラーメン屋さんをお知らせします。"
         
         return (
@@ -47,19 +48,24 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         context = handler_input.request_envelope.context
-        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
-        if isgeosupported:
-            print('geolocation is supported.')
+#        print(context.geolocation.coordinate)
+#        hundlerinput = handler_input.request_envelope.context
+#        print(hundlerinput)
 
-        latitude1 = context.geolocation.coordinate.latitude_in_degrees
-        print(latitude1)
-        longitude1 = context.geolocation.coordinate.longitude_in_degrees
-        print(longitude1)
+#        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
+#        if isgeosupported:
+#            print('geolocation is supported.')
+
+        latitude = context.geolocation.coordinate.latitude_in_degrees
+#        print(latitude1)
+        longitude = context.geolocation.coordinate.longitude_in_degrees
+#        print(longitude1)
         
         param1 = shopinfo.reputationApi('ラーメン')
         apibase = param1.baseinfo()
-        param2 = shopinfo.geoLocation("43.0555316", "141.3526345")
+#        param2 = shopinfo.geoLocation("43.0555316", "141.3526345")
 #        param2 = shopinfo.geoLocation('43.058377961865624', '141.25509169734372')
+        param2 = shopinfo.geoLocation(latitude, longitude)
         geolocation = param2.geolocation()
         merge = shopinfo.mergeApiParameter()
         param = merge.api_parameter(apibase, geolocation)
