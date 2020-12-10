@@ -78,7 +78,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         shop2 = shop.reputation_search()
         
         session_attr = handler_input.attributes_manager.session_attributes
-        session_attr['result'] = shop2
+        session_attr['shopinfo'] = shop2
         
         if shop2:
             speak_output = f"{hitcount}件の口コミが見つかりました。"
@@ -147,6 +147,33 @@ class HelpIntentHandler(AbstractRequestHandler):
             handler_input.response_builder
                 .speak(speak_output)
                 .ask(speak_output)
+                .response
+        )
+
+class YesIntentHandler(AbstractRequestHandler):
+    """Yes Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return (ask_utils.is_intent_name("AMAZON.YesIntent")(handler_input))
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        session_attr = handler_input.attributes_manager.session_attributes
+        session_attr['shopinfo']
+
+        start = session_attr['start']
+        end = session_attr['end']
+        speak_output = ''
+        if session_attr['q'] == 'yes' or session_attr['next'] == 'yes':
+            for i in range(start, end):
+                speak_output += session_attr['shopinfo'][i]['name'] + '。'
+                speak_output += session_attr['shopinfo'][i]['comment'] + 'お店まではここから約' + str(session_attr['shopinfo'][i]['distance']) + 'メートルです。'
+                session_attr['start'] += 1
+                session_attr['end'] += 1
+
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
                 .response
         )
 
