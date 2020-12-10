@@ -56,16 +56,16 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
 #        if isgeosupported:
 #            print('geolocation is supported.')
 
-        latitude = context.geolocation.coordinate.latitude_in_degrees
+#        latitude = context.geolocation.coordinate.latitude_in_degrees
 #        print(latitude1)
-        longitude = context.geolocation.coordinate.longitude_in_degrees
+#        longitude = context.geolocation.coordinate.longitude_in_degrees
 #        print(longitude1)
         
         param1 = shopinfo.reputationApi('ラーメン')
         apibase = param1.baseinfo()
-#        param2 = shopinfo.geoLocation("43.0555316", "141.3526345")
+        param2 = shopinfo.geoLocation("43.0555316", "141.3526345")
 #        param2 = shopinfo.geoLocation('43.058377961865624', '141.25509169734372')
-        param2 = shopinfo.geoLocation(latitude, longitude)
+#        param2 = shopinfo.geoLocation(latitude, longitude)
         geolocation = param2.geolocation()
         merge = shopinfo.mergeApiParameter()
         param = merge.api_parameter(apibase, geolocation)
@@ -78,6 +78,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         shop2 = shop.reputation_search()
         
         session_attr = handler_input.attributes_manager.session_attributes
+        session_attr['result'] = shop2
         
         if shop2:
             speak_output = f"{hitcount}件の口コミが見つかりました。"
