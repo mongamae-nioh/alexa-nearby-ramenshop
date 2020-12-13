@@ -14,7 +14,7 @@ from ask_sdk_core.handler_input import HandlerInput
 
 from ask_sdk_model import Response
 
-import shopinfo
+from shopinfo import reputationApi,geoLocation,mergeApiParameter,reputationInfo
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -61,18 +61,18 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
 #        longitude = context.geolocation.coordinate.longitude_in_degrees
 #        print(longitude1)
         
-        param1 = shopinfo.reputationApi('ラーメン')
+        param1 = reputationApi('ラーメン')
         apibase = param1.baseinfo()
-        param2 = shopinfo.geoLocation("43.0555316", "141.3526345")
-#        param2 = shopinfo.geoLocation('43.058377961865624', '141.25509169734372')
-#        param2 = shopinfo.geoLocation(latitude, longitude)
+        param2 = geoLocation("43.0555316", "141.3526345")
+#        param2 = geoLocation('43.058377961865624', '141.25509169734372')
+#        param2 = geoLocation(latitude, longitude)
         geolocation = param2.geolocation()
-        merge = shopinfo.mergeApiParameter()
+        merge = mergeApiParameter()
         param = merge.api_parameter(apibase, geolocation)
         url = param1.url
 
         #shop = restrantInfo(url, param)
-        shop = shopinfo.reputationInfo(url, param)
+        shop = reputationInfo(url, param)
 
         hitcount = shop.hit_count2()
         shop2 = shop.reputation_search()
