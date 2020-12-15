@@ -14,6 +14,7 @@ from ask_sdk_core.handler_input import HandlerInput
 
 from ask_sdk_model import Response
 
+#import shopinfo
 from shopinfo import reputationApi,geoLocation,mergeApiParameter,reputationInfo
 
 logger = logging.getLogger(__name__)
@@ -159,15 +160,17 @@ class YesIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         session_attr = handler_input.attributes_manager.session_attributes
-        session_attr['shopinfo']
+        shopinfo = session_attr['shopinfo']
+#        print(type(shopinfo))
 
         start = session_attr['start']
         end = session_attr['end']
         speak_output = ''
-        if session_attr['q'] == 'yes' or session_attr['next'] == 'yes':
+#        print(shopinfo)
+        if session_attr['q'] == 'yes' and session_attr['next'] == 'yes':
             for i in range(start, end):
-                speak_output += session_attr['shopinfo'][i]['name'] + '。'
-                speak_output += session_attr['shopinfo'][i]['comment'] + 'お店まではここから約' + str(session_attr['shopinfo'][i]['distance']) + 'メートルです。'
+                speak_output += shopinfo[str(i)]['name'] + '。'
+                speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
                 session_attr['start'] += 1
                 session_attr['end'] += 1
 
@@ -263,6 +266,7 @@ sb = SkillBuilder()
 
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(HelloWorldIntentHandler())
+sb.add_request_handler(YesIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
