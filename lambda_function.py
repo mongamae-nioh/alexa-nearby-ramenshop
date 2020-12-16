@@ -49,19 +49,14 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         context = handler_input.request_envelope.context
-#        print(context.geolocation.coordinate)
-#        hundlerinput = handler_input.request_envelope.context
-#        print(hundlerinput)
 
 #        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
 #        if isgeosupported:
 #            print('geolocation is supported.')
 
 #        latitude = context.geolocation.coordinate.latitude_in_degrees
-#        print(latitude1)
 #        longitude = context.geolocation.coordinate.longitude_in_degrees
-#        print(longitude1)
-        
+
         param1 = reputationApi('ラーメン')
         apibase = param1.baseinfo()
         param2 = geoLocation("43.0555316", "141.3526345")
@@ -172,13 +167,30 @@ class YesIntentHandler(AbstractRequestHandler):
                 speak_output += shopinfo[str(i)]['name'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
                 session_attr['start'] += 1
-                session_attr['end'] += 1
+                session_attr['next'] = 'yes'
 
-        return (
-            handler_input.response_builder
+            session_attr['end'] = session_attr['start'] + 2
+            speak_output += "次の口コミを聞きますか？"
+            session_attr['q'] = 'yes'
+
+            ask_output = "そのほかの口コミを聞きますか？"
+
+            return (
+                handler_input.response_builder
+                .speak(speak_output)
+                .ask(ask_output)
+                .set_should_end_session(False)
+                .response
+                )
+        else:
+            speak_output += "情報はありませんでした。"
+
+            return (
+                handler_input.response_builder
                 .speak(speak_output)
                 .response
-        )
+                )
+
 
 class CancelOrStopIntentHandler(AbstractRequestHandler):
     """Single handler for Cancel and Stop Intent."""
