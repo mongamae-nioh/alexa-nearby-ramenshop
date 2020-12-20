@@ -6,6 +6,7 @@ import os
 keyid = "apikey"
 
 class restrantApi:
+    '''レストラン検索APIリクエストのパラメータ作成'''
     def __init__(self, category1, category2):
         self._url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
         self._keyid = keyid
@@ -29,6 +30,7 @@ class restrantApi:
         return baseinfo
 
 class reputationApi:
+    '''口コミAPIリクエストのパラメータ作成'''
     def __init__(self, menu):
         self._url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
         self._keyid = keyid
@@ -50,6 +52,7 @@ class reputationApi:
         return baseinfo
 
 class geoLocation:
+    '''位置情報のパラメータを作成'''
     def __init__(self, latitude, longitude):
         self.latitude = latitude
         self.longitude = longitude
@@ -61,9 +64,22 @@ class geoLocation:
 
         return geolocation    
 
-class mergeApiParameter:
-    '''APIリクエストのパラメータとして使うために複数の辞書をマージするクラス'''
+class searchRange:
+    '''検索範囲を指定'''
+    def current_page(self, int):
+        current_page = {}
+        current_page['offset_page'] = self.int
 
+        return current_page
+    
+    def range(self, int):
+        range = {}
+        range['range'] = self.int
+
+        return range        
+
+class mergeApiParameter:
+    '''APIリクエストのパラメータとして使うために複数の辞書をマージする'''
     def api_parameter(self, *args):
         parameter = {}
 
@@ -73,6 +89,7 @@ class mergeApiParameter:
         return parameter
 
 class apiRequest:
+    '''APIリクエストとレスポンスを返す'''
     def __init__(self, url, param):
         self.url = url
         self.param = param
@@ -106,19 +123,8 @@ class apiRequest:
         
         return total_page
 
-    def current_page(self):
-        current_page = {}
-        current_page['offset_page'] = 1
-
-        return current_page
-    
-    def range(self):
-        range = {}
-        range['range'] = 1
-
-        return range        
-
 class restrantInfo(apiRequest):
+    '''レストラン検索APIのレスポンスを辞書へ格納する'''
     def __init__(self, url, param):
         super().__init__(url, param)
     
@@ -140,6 +146,7 @@ class restrantInfo(apiRequest):
         return restrant_info    
 
 class reputationInfo(apiRequest):
+    '''口コミAPIのレスポンスを辞書へ格納する'''
     def __init__(self, url, param):
         super().__init__(url, param)
     
@@ -179,9 +186,7 @@ class reputationInfo(apiRequest):
                         "url": shop_data[str(i)]['photo']['shop_url']
                     }
                 })
-        
-#        print(temp_reputation_info)
-        
+                
         reputation_info = {}
         index = 0
         for i,j in temp_reputation_info.items():
@@ -198,31 +203,3 @@ class reputationInfo(apiRequest):
             index += 1
         
         return reputation_info
-
-#param1 = restrantApi('RSFST08000', 'RSFST08008')
-param1 = reputationApi('ラーメン')
-apibase = param1.baseinfo()
-
-param2 = geoLocation("43.0555316", "141.3526345")
-geolocation = param2.geolocation()
-
-merge = mergeApiParameter()
-param = merge.api_parameter(apibase, geolocation)
-
-url = param1.url
-
-#shop = restrantInfo(url, param)
-shop = reputationInfo(url, param)
-#shop2 = shop.restrant_search()
-shop2 = shop.reputation_search()
-#hitcount = shop.hit_count2()
-#print(shop2)
-
-#for i,j in shop2.items():
-#    mojiretsu = i + 'の口コミです。'
-#    mojiretsu += j['comment'] + '現在地からの距離はおおよそ' + str(j['distance']) + 'メートルです。'
-#    print(mojiretsu)
-
-#print(hitcount)
-json = json.dumps(shop2, indent=4, ensure_ascii=False)
-print(json)
