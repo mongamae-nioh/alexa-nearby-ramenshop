@@ -75,6 +75,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         
         session_attr = handler_input.attributes_manager.session_attributes
         session_attr['shopinfo'] = shop2
+        session_attr['length'] = len(shop2)
         
         if shop2:
             speak_output = f"{hitcount}件の口コミが見つかりました。"
@@ -93,19 +94,16 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
 
         session_attr['start'] = 0
 
-        if len(shop2) < 3:
+        if session_attr['length'] < 3:
             session_attr['next'] = 'no'
             session_attr['q'] = 'no'
 
-            for i in range(len(shop2)):
+            for i in range(session_attr['length']):
                 speak_output += shop2[i]['name'] + '。'
-                speak_output += shop2[i]['comment'] + 'お店までの距離はここから約' + str(shop2[i]['distance']) + 'メートルです。'
-                
-            return (
-                handler_input.response_builder
-                .speak(speak_output)
-                .response
-                )
+                speak_output += shop2[i]['comment'] + 'お店までの距離はここから約' + str(shop2[i]['distance']) + 'メートルです。口コミは以上です。'                
+
+            return (handler_input.response_builder.speak(speak_output).response)
+
         else:
             speak_output += 'いくつかをご紹介します。'
             for i in range(2):
@@ -116,6 +114,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
                 session_attr['start'] += 1
 
             session_attr['end'] = session_attr['start'] + 2
+            session_attr['length'] -= 2
             speak_output += "次の口コミを聞きますか？"
             session_attr['q'] = 'yes'
 
@@ -138,13 +137,8 @@ class HelpIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         speak_output = "You can say hello to me! How can I help?"
+        return (handler_input.response_builder.speak(speak_output).response)
 
-        return (
-            handler_input.response_builder
-                .speak(speak_output)
-                .ask(speak_output)
-                .response
-        )
 
 class YesIntentHandler(AbstractRequestHandler):
     """Yes Intent."""
@@ -162,7 +156,7 @@ class YesIntentHandler(AbstractRequestHandler):
         end = session_attr['end']
         speak_output = ''
 #        print(shopinfo)
-        if session_attr['q'] == 'yes' and session_attr['next'] == 'yes':
+        if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
             for i in range(start, end):
                 speak_output += shopinfo[str(i)]['name'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
@@ -170,9 +164,14 @@ class YesIntentHandler(AbstractRequestHandler):
                 session_attr['next'] = 'yes'
 
             session_attr['end'] = session_attr['start'] + 2
-            speak_output += "次の口コミを聞きますか？"
+            session_attr['length'] -= 2
             session_attr['q'] = 'yes'
 
+            if session_attr['length'] == 0:
+                speak_output += "口コミは以上です。"
+                return (handler_input.response_builder.speak(speak_output).response)
+                        
+            speak_output += "次の口コミを聞きますか？"
             ask_output = "そのほかの口コミを聞きますか？"
 
             return (
@@ -183,14 +182,8 @@ class YesIntentHandler(AbstractRequestHandler):
                 .response
                 )
         else:
-            speak_output += "情報はありませんでした。"
-
-            return (
-                handler_input.response_builder
-                .speak(speak_output)
-                .response
-                )
-
+            speak_output += "口コミはありませんでした。"
+            return (handler_input.response_builder.speak(speak_output).response)
 
 class CancelOrStopIntentHandler(AbstractRequestHandler):
     """Single handler for Cancel and Stop Intent."""
