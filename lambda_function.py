@@ -136,7 +136,7 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "You can say hello to me! How can I help?"
+        speak_output = "現在地の近くにあるラーメン屋さんの口コミを紹介します。"
         return (handler_input.response_builder.speak(speak_output).response)
 
 
@@ -194,7 +194,7 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Goodbye!"
+        speak_output = "わかりました。"
 
         return (
             handler_input.response_builder
@@ -253,7 +253,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         # type: (HandlerInput, Exception) -> Response
         logger.error(exception, exc_info=True)
 
-        speak_output = "Sorry, I had trouble doing what you asked. Please try again."
+        speak_output = "すみません。よくわかりませんでした。"
 
         return (
             handler_input.response_builder
