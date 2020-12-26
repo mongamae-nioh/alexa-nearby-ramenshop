@@ -156,6 +156,9 @@ class YesIntentHandler(AbstractRequestHandler):
         speak_output = ''
 
         if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
+            if session_attr['length'] <= 2:
+                speak_output += "これが最後の口コミです。"
+                
             for i in range(start, end):
                 speak_output += shopinfo[str(i)]['name'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
@@ -166,7 +169,7 @@ class YesIntentHandler(AbstractRequestHandler):
             session_attr['length'] -= 2
             session_attr['q'] = 'yes'
 
-            if session_attr['length'] == 0:
+            if session_attr['length'] <= 0:
                 speak_output += "口コミは以上です。"
                 return (handler_input.response_builder.speak(speak_output).response)
                         
@@ -229,6 +232,9 @@ class GoNextIntentHandler(AbstractRequestHandler):
         speak_output = ''
 
         if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
+            if session_attr['length'] <= 2:
+                speak_output += "これが最後の口コミです。"
+                
             for i in range(start, end):
                 speak_output += shopinfo[str(i)]['name'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
@@ -239,7 +245,7 @@ class GoNextIntentHandler(AbstractRequestHandler):
             session_attr['length'] -= 2
             session_attr['q'] = 'yes'
 
-            if session_attr['length'] == 0:
+            if session_attr['length'] <= 0:
                 speak_output += "口コミは以上です。"
                 return (handler_input.response_builder.speak(speak_output).response)
                         
