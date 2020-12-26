@@ -150,12 +150,11 @@ class YesIntentHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
         session_attr = handler_input.attributes_manager.session_attributes
         shopinfo = session_attr['shopinfo']
-#        print(type(shopinfo))
 
         start = session_attr['start']
         end = session_attr['end']
         speak_output = ''
-#        print(shopinfo)
+
         if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
             for i in range(start, end):
                 speak_output += shopinfo[str(i)]['name'] + '。'
@@ -214,6 +213,49 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
                 .response
         )
 
+class GoNextIntentHandler(AbstractRequestHandler):
+    """Go Next shoplist Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("GoNextIntent")(handler_input)
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        session_attr = handler_input.attributes_manager.session_attributes
+        shopinfo = session_attr['shopinfo']
+
+        start = session_attr['start']
+        end = session_attr['end']
+        speak_output = ''
+
+        if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
+            for i in range(start, end):
+                speak_output += shopinfo[str(i)]['name'] + '。'
+                speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
+                session_attr['start'] += 1
+                session_attr['next'] = 'yes'
+
+            session_attr['end'] = session_attr['start'] + 2
+            session_attr['length'] -= 2
+            session_attr['q'] = 'yes'
+
+            if session_attr['length'] == 0:
+                speak_output += "口コミは以上です。"
+                return (handler_input.response_builder.speak(speak_output).response)
+                        
+            speak_output += "次の口コミを聞きますか？"
+            ask_output = "そのほかの口コミを聞きますか？"
+
+            return (
+                handler_input.response_builder
+                .speak(speak_output)
+                .ask(ask_output)
+                .set_should_end_session(False)
+                .response
+                )
+        else:
+            speak_output += "口コミはありませんでした。"
+            return (handler_input.response_builder.speak(speak_output).response)
 
 class SessionEndedRequestHandler(AbstractRequestHandler):
     """Handler for Session End."""
@@ -287,6 +329,7 @@ sb.add_request_handler(YesIntentHandler())
 sb.add_request_handler(NoIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
+sb.add_request_handler(GoNextIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
 sb.add_request_handler(IntentReflectorHandler()) # make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
 
