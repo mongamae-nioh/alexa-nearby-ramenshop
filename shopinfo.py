@@ -96,6 +96,12 @@ class apiRequest:
 
         return response.json()
 
+    def error_code(self):
+        '''エラーコードを返す'''
+        res = self.api_request()
+        error_code = res['gnavi']['error'][0]['code']
+        return error_code
+
     def hit_count(self):
         res = self.api_request()
         hitcount = res['total_hit_count']
