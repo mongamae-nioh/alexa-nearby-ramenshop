@@ -65,18 +65,15 @@ class geoLocation:
         return geolocation    
 
 class searchRange:
-    '''検索範囲を指定'''
-    def current_page(self, int):
-        current_page = {}
-        current_page['offset_page'] = self.int
-
-        return current_page
+    '''検索範囲を指定 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m'''
+    def __init__(self, area_range):
+        self.area_range = area_range
     
-    def range(self, int):
+    def set_range(self):
         range = {}
-        range['range'] = self.int
+        range['range'] = self.area_range
 
-        return range        
+        return range      
 
 class mergeApiParameter:
     '''APIリクエストのパラメータとして使うために複数の辞書をマージする'''
