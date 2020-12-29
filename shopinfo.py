@@ -53,27 +53,20 @@ class reputationApi:
 
 class geoLocation:
     '''位置情報のパラメータを作成'''
-    def __init__(self, latitude, longitude):
-        self.latitude = latitude
-        self.longitude = longitude
-
-    def geolocation(self):
+    def set_geolocation(self, latitude, longitude):
         geolocation = {}
-        geolocation['latitude'] = self.latitude
-        geolocation['longitude'] = self.longitude
+        geolocation['latitude'] = latitude
+        geolocation['longitude'] = longitude
 
-        return geolocation    
+        return geolocation   
 
 class searchRange:
     '''検索範囲を指定 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m'''
-    def __init__(self, area_range):
-        self.area_range = area_range
-    
-    def set_range(self):
+    def search_range(self, num):
         range = {}
-        range['range'] = self.area_range
+        range['range'] = num
 
-        return range      
+        return range
 
 class mergeApiParameter:
     '''APIリクエストのパラメータとして使うために複数の辞書をマージする'''
