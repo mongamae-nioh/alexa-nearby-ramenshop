@@ -30,7 +30,6 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-#        speak_output = "Welcome, you can say Hello or Help. Which would you like to try?"
         speak_output = "近くのラーメン屋さんをお知らせします。"
         
         return (
@@ -50,28 +49,33 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
         context = handler_input.request_envelope.context
 
-#        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
-#        if isgeosupported:
-#            print('geolocation is supported.')
-
-#        latitude = context.geolocation.coordinate.latitude_in_degrees
-#        longitude = context.geolocation.coordinate.longitude_in_degrees
-
         param1 = reputationApi('ラーメン')
         apibase = param1.baseinfo()
+
+        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
+        if isgeosupported:
+            print('geolocation is supported.')
+
+        latitude = context.geolocation.coordinate.latitude_in_degrees
+        longitude = context.geolocation.coordinate.longitude_in_degrees
+
         param2 = geoLocation()
+        geolocation = param2.set_geolocation(latitude, longitude)
 
         ## 平和
         #geolocation = param2.set_geolocation('43.058377961865624', '141.25509169734372')
 
         ## すすきの
-        geolocation = param2.set_geolocation("43.0555316", "141.3526345")
+        #geolocation = param2.set_geolocation("43.0555316", "141.3526345")
 
-        ## 民家（range1ではヒットしない）
-        #geolocation = param2.set_geolocation("43.05984009036904", "141.2486728678904")
+        ## JR琴似駅
+        #geolocation = param2.set_geolocation("43.081898", "141.306774")
+
+        ## 宮の沢
+#        geolocation = param2.set_geolocation("43.08970911807292", "141.27771842709322")
         
         merge = mergeApiParameter()
-        area_range = searchRange().set_range(3)
+        area_range = searchRange().set_range(5)
         param = merge.api_parameter(apibase, geolocation, area_range)
         url = param1.url
 
@@ -88,17 +92,8 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         if shop2:
             speak_output = f"{hitcount}件の口コミが見つかりました。"
         else:
-            speak_output = '近くには見つかりませんでした。範囲を広げて探しましょうか？'
-            ask_output = "範囲を広げて探しますか？"
-            session_attr['shop'] = 'no'
-
-            return (
-                handler_input.response_builder
-                .speak(speak_output)
-                .ask(ask_output)
-                .set_should_end_session(False)
-                .response
-                )
+            speak_output = 'すみません。お店は見つかりませんでした。'
+            return (handler_input.response_builder.speak(speak_output).response)
 
         session_attr['start'] = 0
 
@@ -164,9 +159,15 @@ class YesIntentHandler(AbstractRequestHandler):
         speak_output = ''
 
         if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
-            if session_attr['length'] <= 2:
+            if 0 < session_attr['length'] <= 2:
                 speak_output += "これが最後の口コミです。"
                 
+            if session_attr['length'] == 1:
+                speak_output += shopinfo[str(start)]['name'] + '。'
+                speak_output += shopinfo[str(start)]['comment'] + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。'
+                speak_output += "口コミは以上です。"
+                return (handler_input.response_builder.speak(speak_output).response)
+
             for i in range(start, end):
                 speak_output += shopinfo[str(i)]['name'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
@@ -191,9 +192,6 @@ class YesIntentHandler(AbstractRequestHandler):
                 .set_should_end_session(False)
                 .response
                 )
-        else:
-            speak_output += "口コミはありませんでした。"
-            return (handler_input.response_builder.speak(speak_output).response)
 
 class NoIntentHandler(AbstractRequestHandler):
     """No Intent."""
@@ -240,9 +238,15 @@ class GoNextIntentHandler(AbstractRequestHandler):
         speak_output = ''
 
         if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
-            if session_attr['length'] <= 2:
+            if 0 < session_attr['length'] <= 2:
                 speak_output += "これが最後の口コミです。"
                 
+            if session_attr['length'] == 1:
+                speak_output += shopinfo[str(start)]['name'] + '。'
+                speak_output += shopinfo[str(start)]['comment'] + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。'
+                speak_output += "口コミは以上です。"
+                return (handler_input.response_builder.speak(speak_output).response)
+
             for i in range(start, end):
                 speak_output += shopinfo[str(i)]['name'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
@@ -267,9 +271,6 @@ class GoNextIntentHandler(AbstractRequestHandler):
                 .set_should_end_session(False)
                 .response
                 )
-        else:
-            speak_output += "口コミはありませんでした。"
-            return (handler_input.response_builder.speak(speak_output).response)
 
 class SessionEndedRequestHandler(AbstractRequestHandler):
     """Handler for Session End."""
@@ -327,6 +328,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
             handler_input.response_builder
                 .speak(speak_output)
                 .ask(speak_output)
+                .set_should_end_session(False)
                 .response
         )
 
