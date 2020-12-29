@@ -89,11 +89,15 @@ class apiRequest:
 
         return response.json()
 
-    def error_code(self):
-        '''エラーコードを返す'''
+    def return_code(self):
+        '''APIに正常終了のコードが存在しないためエラーコードが存在しない場合に正常と判断する(200を返す)'''
+        '''異常終了時のコードは https://api.gnavi.co.jp/api/manual/photosearch/ 参照'''
         res = self.api_request()
-        error_code = res['gnavi']['error'][0]['code']
-        return error_code
+        try:
+          error_code = res['gnavi']['error'][0]['code']
+          return error_code
+        except KeyError: # エラーコードが存在しない場合
+          return 200
 
     def hit_count(self):
         res = self.api_request()
