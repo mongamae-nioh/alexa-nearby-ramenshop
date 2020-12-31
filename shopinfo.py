@@ -2,8 +2,9 @@ import requests
 import json
 import math
 import os
+import apikey
 
-keyid = "apikey"
+keyid = apikey.keyid
 
 class restrantApi:
     '''レストラン検索APIリクエストのパラメータ作成'''
@@ -94,10 +95,10 @@ class apiRequest:
         '''異常終了時のコードは https://api.gnavi.co.jp/api/manual/photosearch/ 参照'''
         res = self.api_request()
         try:
-          error_code = res['gnavi']['error'][0]['code']
-          return error_code
+            error_code = res['gnavi']['error'][0]['code']
+            return error_code
         except KeyError: # エラーコードが存在しない場合
-          return 200
+            return 200
 
     def hit_count(self):
         res = self.api_request()
