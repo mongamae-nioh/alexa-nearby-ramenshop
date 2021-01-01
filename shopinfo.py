@@ -66,9 +66,9 @@ class searchRange:
 
         return range
     
-class mergeApiParameter:
+class apiRequestParameter:
     '''APIリクエストのパラメータとして使うために複数の辞書をマージする'''
-    def api_parameter(self, *args):
+    def merge(self, *args):
         parameter = {}
 
         for i in args:
