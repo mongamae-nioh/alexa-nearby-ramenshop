@@ -11,6 +11,7 @@ from ask_sdk_core.skill_builder import SkillBuilder
 from ask_sdk_core.dispatch_components import AbstractRequestHandler
 from ask_sdk_core.dispatch_components import AbstractExceptionHandler
 from ask_sdk_core.handler_input import HandlerInput
+from ask_sdk_model import ui
 
 from ask_sdk_model import Response
 
@@ -63,16 +64,16 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
 #        geolocation = param2.set_geolocation(latitude, longitude)
 
         ## 平和
-        geolocation = param2.set_geolocation('43.058377961865624', '141.25509169734372')
+        #geolocation = param2.set_geolocation('43.058377961865624', '141.25509169734372')
 
         ## すすきの
         #geolocation = param2.set_geolocation("43.0555316", "141.3526345")
 
         ## JR琴似駅
-        #geolocation = param2.set_geolocation("43.081898", "141.306774")
+        geolocation = param2.set_geolocation("43.081898", "141.306774")
 
         ## 宮の沢
-#        geolocation = param2.set_geolocation("43.08970911807292", "141.27771842709322")
+        #geolocation = param2.set_geolocation("43.08970911807292", "141.27771842709322")
         
         merge = mergeApiParameter()
         area_range = searchRange().set_range(5)
@@ -96,20 +97,27 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
             return (handler_input.response_builder.speak(speak_output).response)
 
         session_attr['start'] = 0
+        
+        shop_name = ''
 
         if session_attr['length'] < 3:
             session_attr['next'] = 'no'
             session_attr['q'] = 'no'
-
+            
             for i in range(session_attr['length']):
+                shop_name += '・' + shop2[i]['name'] + '(' + str(shop2[i]['distance']) + 'm)' + '\n'
                 speak_output += shop2[i]['kana'] + '。'
-                speak_output += shop2[i]['comment'] + 'お店までの距離はここから約' + str(shop2[i]['distance']) + 'メートルです。口コミは以上です。'                
+                speak_output += shop2[i]['comment'] + 'お店までの距離はここから約' + str(shop2[i]['distance']) + 'メートルです。口コミは以上です。' 
 
-            return (handler_input.response_builder.speak(speak_output).response)
+            return (handler_input.response_builder
+            .speak(speak_output)
+            .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+            .response)
 
         else:
             speak_output += 'いくつかをご紹介します。'
             for i in range(2):
+                shop_name += '・' + shop2[i]['name'] + '(' + str(shop2[i]['distance']) + 'm)' + '\n'
                 speak_output += shop2[i]['kana'] + '。'
                 speak_output += shop2[i]['comment'] + 'お店まではここから約' + str(shop2[i]['distance']) + 'メートルです。'
                 
@@ -126,6 +134,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
             return (
                 handler_input.response_builder
                 .speak(speak_output)
+                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
                 .ask(ask_output)
                 .set_should_end_session(False)
                 .response
@@ -157,18 +166,26 @@ class YesIntentHandler(AbstractRequestHandler):
         start = session_attr['start']
         end = session_attr['end']
         speak_output = ''
+        
+        shop_name = ''
 
         if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
             if 0 < session_attr['length'] <= 2:
                 speak_output += "これが最後の口コミです。"
                 
             if session_attr['length'] == 1:
+                shop_name += '・' + shopinfo[str(start)]['name'] + '(' + str(shopinfo[str(start)]['distance']) + 'm)' + '\n'
                 speak_output += shopinfo[str(start)]['kana'] + '。'
                 speak_output += shopinfo[str(start)]['comment'] + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。'
                 speak_output += "口コミは以上です。"
-                return (handler_input.response_builder.speak(speak_output).response)
+
+                return (handler_input.response_builder
+                .speak(speak_output)
+                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                .response)
 
             for i in range(start, end):
+                shop_name += '・' + shopinfo[str(i)]['name'] + '(' + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
                 speak_output += shopinfo[str(i)]['kana'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
                 session_attr['start'] += 1
@@ -180,7 +197,11 @@ class YesIntentHandler(AbstractRequestHandler):
 
             if session_attr['length'] <= 0:
                 speak_output += "口コミは以上です。"
-                return (handler_input.response_builder.speak(speak_output).response)
+
+                return (handler_input.response_builder
+                .speak(speak_output)
+                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                .response)
                         
             speak_output += "次の口コミを聞きますか？"
             ask_output = "そのほかの口コミを聞きますか？"
@@ -188,6 +209,7 @@ class YesIntentHandler(AbstractRequestHandler):
             return (
                 handler_input.response_builder
                 .speak(speak_output)
+                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
                 .ask(ask_output)
                 .set_should_end_session(False)
                 .response
@@ -236,18 +258,25 @@ class GoNextIntentHandler(AbstractRequestHandler):
         start = session_attr['start']
         end = session_attr['end']
         speak_output = ''
+        shop_name = ''
 
         if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
             if 0 < session_attr['length'] <= 2:
                 speak_output += "これが最後の口コミです。"
                 
             if session_attr['length'] == 1:
+                shop_name += '・' + shopinfo[str(start)]['name'] + '(' + str(shopinfo[str(start)]['distance']) + 'm)' + '\n'
                 speak_output += shopinfo[str(start)]['kana'] + '。'
                 speak_output += shopinfo[str(start)]['comment'] + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。'
                 speak_output += "口コミは以上です。"
-                return (handler_input.response_builder.speak(speak_output).response)
+                
+                return (handler_input.response_builder
+                .speak(speak_output)
+                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                .response)
 
             for i in range(start, end):
+                shop_name += '・' + shopinfo[str(i)]['name']  + '(' + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
                 speak_output += shopinfo[str(i)]['kana'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
                 session_attr['start'] += 1
@@ -259,7 +288,10 @@ class GoNextIntentHandler(AbstractRequestHandler):
 
             if session_attr['length'] <= 0:
                 speak_output += "口コミは以上です。"
-                return (handler_input.response_builder.speak(speak_output).response)
+                return (handler_input.response_builder
+                .speak(speak_output)
+                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                .response)
                         
             speak_output += "次の口コミを聞きますか？"
             ask_output = "そのほかの口コミを聞きますか？"
@@ -267,6 +299,7 @@ class GoNextIntentHandler(AbstractRequestHandler):
             return (
                 handler_input.response_builder
                 .speak(speak_output)
+                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
                 .ask(ask_output)
                 .set_should_end_session(False)
                 .response
