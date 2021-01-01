@@ -16,7 +16,7 @@ from ask_sdk_model import ui
 from ask_sdk_model import Response
 
 #import shopinfo
-from shopinfo import reputationApi,geoLocation,searchRange,mergeApiParameter,reputationInfo
+from shopinfo import reputationApi,geoLocation,searchRange,apiRequestParameter,reputationInfo
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -59,13 +59,13 @@ class LaunchRequestHandler(AbstractRequestHandler):
         ## 宮の沢
         #geolocation = param2.set_geolocation("43.08970911807292", "141.27771842709322")
         
-        merge = mergeApiParameter()
+        param = apiRequestParameter()
         area_range = searchRange().set_range(5)
-        param = merge.api_parameter(apibase, geolocation, area_range)
+        parameter = param.merge(apibase, geolocation, area_range)
         url = param1.url
 
-        #shop = restrantInfo(url, param)
-        shop = reputationInfo(url, param)
+        #shop = restrantInfo(url, parameter)
+        shop = reputationInfo(url, parameter)
 
         hitcount = shop.hit_count2()
         shop2 = shop.reputation_search()
