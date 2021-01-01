@@ -109,28 +109,6 @@ class apiRequest:
         
         return total_page
 
-class restrantInfo(apiRequest):
-    '''レストラン検索APIのレスポンスを辞書へ格納する'''
-    def __init__(self, url, param):
-        super().__init__(url, param)
-    
-    def restrant_search(self):
-        shop_data = self.api_request()     
-        total_page = self.total_page()
-        page = 1
-
-        restrant_info = {}
-        while total_page >= page:
-            for shop in shop_data['rest']:
-                restrant_info[shop['name']] = shop['name_kana']
-            page += 1
-            param = self.param
-            param['offset_page'] = page
-            response = requests.get(self.url, params=param)
-            shop_data = response.json()
-
-        return restrant_info    
-
 class reputationInfo(apiRequest):
     '''口コミAPIのレスポンスを辞書へ格納する'''
     def __init__(self, url, param):
