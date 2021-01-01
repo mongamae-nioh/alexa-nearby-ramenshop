@@ -160,6 +160,7 @@ class reputationInfo(apiRequest):
             for i in range(per_page):
                 temp_reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
+                        "shop_id": shop_data[str(i)]['photo']['shop_id'],
                         "menu": shop_data[str(i)]['photo']['menu_name'],
                         "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
                         "score": shop_data[str(i)]['photo']['total_score'],
@@ -178,6 +179,7 @@ class reputationInfo(apiRequest):
                 temp_reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
                         "menu": shop_data[str(i)]['photo']['menu_name'],
+                        "shop_id": shop_data[str(i)]['photo']['shop_id'],
                         "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
                         "score": shop_data[str(i)]['photo']['total_score'],
                         "distance": shop_data[str(i)]['photo']['distance'],
@@ -191,6 +193,7 @@ class reputationInfo(apiRequest):
             reputation_info.update({
                 index: {
                     "name": i,
+                    "shop_id": j['shop_id'],
                     "menu": j['menu'],
                     "comment": j['comment'],
                     "distance": j['distance'],
@@ -199,7 +202,6 @@ class reputationInfo(apiRequest):
                 }
             )
             index += 1
-        
         return reputation_info
 
 class shopNameKana(apiRequest):
