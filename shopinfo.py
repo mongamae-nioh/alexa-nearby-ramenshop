@@ -147,6 +147,13 @@ class reputationInfo(apiRequest):
     '''口コミAPIのレスポンスを辞書へ格納する'''
     def __init__(self, url, param):
         super().__init__(url, param)
+
+    def shop_kana(self, id):
+        url = restrantSearchApi().url
+        shop_id = restrantSearchApi().api_request(id)
+        shop_kana = shopNameKana(url, shop_id).get_kana()
+
+        return shop_kana
     
     def reputation_search(self):
         shop_data = self.api_request()['response']
@@ -161,6 +168,7 @@ class reputationInfo(apiRequest):
                 temp_reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
                         "shop_id": shop_data[str(i)]['photo']['shop_id'],
+                        "kana": self.shop_kana(shop_data[str(i)]['photo']['shop_id']),
                         "menu": shop_data[str(i)]['photo']['menu_name'],
                         "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
                         "score": shop_data[str(i)]['photo']['total_score'],
@@ -180,6 +188,7 @@ class reputationInfo(apiRequest):
                     shop_data[str(i)]['photo']['shop_name']: { 
                         "menu": shop_data[str(i)]['photo']['menu_name'],
                         "shop_id": shop_data[str(i)]['photo']['shop_id'],
+                        "kana": self.shop_kana(shop_data[str(i)]['photo']['shop_id']),
                         "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
                         "score": shop_data[str(i)]['photo']['total_score'],
                         "distance": shop_data[str(i)]['photo']['distance'],
@@ -194,6 +203,7 @@ class reputationInfo(apiRequest):
                 index: {
                     "name": i,
                     "shop_id": j['shop_id'],
+                    "kana": j['kana'],
                     "menu": j['menu'],
                     "comment": j['comment'],
                     "distance": j['distance'],
@@ -208,9 +218,8 @@ class shopNameKana(apiRequest):
     '''レストラン検索APIから店名の読みがなを取得する'''
     def __init__(self, url, param):
         super().__init__(url, param)
-    
+
     def get_kana(self):
         shop_data = self.api_request()
         shop_kana = shop_data['rest'][0]['name_kana']
-        print(shop_kana)
         return shop_kana
