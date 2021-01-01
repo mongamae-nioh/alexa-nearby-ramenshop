@@ -45,29 +45,29 @@ class LaunchRequestHandler(AbstractRequestHandler):
 #        longitude = context.geolocation.coordinate.longitude_in_degrees
 
         param2 = geoLocation()
-#        geolocation = param2.set_geolocation(latitude, longitude)
+#        geolocation = param2.set(latitude, longitude)
 
         ## 平和
-        #geolocation = param2.set_geolocation('43.058377961865624', '141.25509169734372')
+        #geolocation = param2.set('43.058377961865624', '141.25509169734372')
 
         ## すすきの
-        #geolocation = param2.set_geolocation("43.0555316", "141.3526345")
+        #geolocation = param2.set("43.0555316", "141.3526345")
 
         ## JR琴似駅
-        geolocation = param2.set_geolocation("43.081898", "141.306774")
+        geolocation = param2.set("43.081898", "141.306774")
 
         ## 宮の沢
-        #geolocation = param2.set_geolocation("43.08970911807292", "141.27771842709322")
+        #geolocation = param2.set("43.08970911807292", "141.27771842709322")
         
         param = apiRequestParameter()
-        area_range = searchRange().set_range(5)
+        area_range = searchRange().set(5)
         parameter = param.merge(apibase, geolocation, area_range)
         url = param1.url
 
         #shop = restrantInfo(url, parameter)
         shop = reputationInfo(url, parameter)
 
-        hitcount = shop.hit_count2()
+        hitcount = shop.hit_count()
         shop2 = shop.reputation_search()
         
         session_attr = handler_input.attributes_manager.session_attributes
