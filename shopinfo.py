@@ -51,7 +51,7 @@ class reputationApi:
 
 class geoLocation:
     '''位置情報のパラメータを作成'''
-    def set_geolocation(self, latitude, longitude):
+    def set(self, latitude, longitude):
         geolocation = {}
         geolocation['latitude'] = latitude
         geolocation['longitude'] = longitude
@@ -60,7 +60,7 @@ class geoLocation:
 
 class searchRange:
     '''検索範囲を指定 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m'''
-    def set_range(self, num):
+    def set(self, num):
         range = {}
         range['range'] = num
 
@@ -99,23 +99,11 @@ class apiRequest:
 
     def hit_count(self):
         res = self.api_request()
-        hitcount = res['total_hit_count']
-
-        return hitcount
-        
-    def total_page(self):
-        res = self.api_request()
-        total_page = math.ceil(res['total_hit_count'] / res['hit_per_page'])
-        
-        return total_page
-
-    def hit_count2(self):
-        res = self.api_request()
         hitcount = res['response']['total_hit_count']
 
         return hitcount
         
-    def total_page2(self):
+    def total_page(self):
         res = self.api_request()
         total_page = math.ceil(res['response']['total_hit_count'] / res['response']['hit_per_page'])
         
@@ -158,7 +146,7 @@ class reputationInfo(apiRequest):
     def reputation_search(self):
         shop_data = self.api_request()['response']
         per_page = shop_data['hit_per_page']
-        hit_count = self.hit_count2()
+        hit_count = self.hit_count()
         page = 1
 
         temp_reputation_info = {}
