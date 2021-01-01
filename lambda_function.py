@@ -52,18 +52,18 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         param1 = reputationApi('ラーメン')
         apibase = param1.baseinfo()
 
-        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
-        if isgeosupported:
-            print('geolocation is supported.')
+#        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
+#        if isgeosupported:
+#            print('geolocation is supported.')
 
-        latitude = context.geolocation.coordinate.latitude_in_degrees
-        longitude = context.geolocation.coordinate.longitude_in_degrees
+#        latitude = context.geolocation.coordinate.latitude_in_degrees
+#        longitude = context.geolocation.coordinate.longitude_in_degrees
 
         param2 = geoLocation()
-        geolocation = param2.set_geolocation(latitude, longitude)
+#        geolocation = param2.set_geolocation(latitude, longitude)
 
         ## 平和
-        #geolocation = param2.set_geolocation('43.058377961865624', '141.25509169734372')
+        geolocation = param2.set_geolocation('43.058377961865624', '141.25509169734372')
 
         ## すすきの
         #geolocation = param2.set_geolocation("43.0555316", "141.3526345")
@@ -102,7 +102,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
             session_attr['q'] = 'no'
 
             for i in range(session_attr['length']):
-                speak_output += shop2[i]['name'] + '。'
+                speak_output += shop2[i]['kana'] + '。'
                 speak_output += shop2[i]['comment'] + 'お店までの距離はここから約' + str(shop2[i]['distance']) + 'メートルです。口コミは以上です。'                
 
             return (handler_input.response_builder.speak(speak_output).response)
@@ -110,7 +110,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         else:
             speak_output += 'いくつかをご紹介します。'
             for i in range(2):
-                speak_output += shop2[i]['name'] + '。'
+                speak_output += shop2[i]['kana'] + '。'
                 speak_output += shop2[i]['comment'] + 'お店まではここから約' + str(shop2[i]['distance']) + 'メートルです。'
                 
                 session_attr['next'] = 'yes'
@@ -163,13 +163,13 @@ class YesIntentHandler(AbstractRequestHandler):
                 speak_output += "これが最後の口コミです。"
                 
             if session_attr['length'] == 1:
-                speak_output += shopinfo[str(start)]['name'] + '。'
+                speak_output += shopinfo[str(start)]['kana'] + '。'
                 speak_output += shopinfo[str(start)]['comment'] + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。'
                 speak_output += "口コミは以上です。"
                 return (handler_input.response_builder.speak(speak_output).response)
 
             for i in range(start, end):
-                speak_output += shopinfo[str(i)]['name'] + '。'
+                speak_output += shopinfo[str(i)]['kana'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
                 session_attr['start'] += 1
                 session_attr['next'] = 'yes'
@@ -242,13 +242,13 @@ class GoNextIntentHandler(AbstractRequestHandler):
                 speak_output += "これが最後の口コミです。"
                 
             if session_attr['length'] == 1:
-                speak_output += shopinfo[str(start)]['name'] + '。'
+                speak_output += shopinfo[str(start)]['kana'] + '。'
                 speak_output += shopinfo[str(start)]['comment'] + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。'
                 speak_output += "口コミは以上です。"
                 return (handler_input.response_builder.speak(speak_output).response)
 
             for i in range(start, end):
-                speak_output += shopinfo[str(i)]['name'] + '。'
+                speak_output += shopinfo[str(i)]['kana'] + '。'
                 speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
                 session_attr['start'] += 1
                 session_attr['next'] = 'yes'
