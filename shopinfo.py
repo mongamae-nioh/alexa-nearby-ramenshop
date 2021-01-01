@@ -6,13 +6,11 @@ import apikey
 
 keyid = apikey.keyid
 
-class restrantApi:
+class restrantSearchApi:
     '''レストラン検索APIリクエストのパラメータ作成'''
-    def __init__(self, category1, category2):
+    def __init__(self):
         self._url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
         self._keyid = keyid
-        self.category1 = category1
-        self.category2 = category2
     
     @property
     def url(self):
@@ -22,13 +20,12 @@ class restrantApi:
     def keyid(self):
         return self._keyid
         
-    def baseinfo(self):
-        baseinfo = {}
-        baseinfo['keyid'] = self._keyid
-        baseinfo['category_l'] = self.category1
-        baseinfo['category_s'] = self.category2
+    def api_request(self, shop_id):
+        parameter = {}
+        parameter['keyid'] = self._keyid
+        parameter['id'] = shop_id
         
-        return baseinfo
+        return parameter
 
 class reputationApi:
     '''口コミAPIリクエストのパラメータ作成'''
@@ -204,3 +201,14 @@ class reputationInfo(apiRequest):
             index += 1
         
         return reputation_info
+
+class shopNameKana(apiRequest):
+    '''レストラン検索APIから店名の読みがなを取得する'''
+    def __init__(self, url, param):
+        super().__init__(url, param)
+    
+    def get_kana(self):
+        shop_data = self.api_request()
+        shop_kana = shop_data['rest'][0]['name_kana']
+        print(shop_kana)
+        return shop_kana
