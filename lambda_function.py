@@ -63,16 +63,16 @@ class LaunchRequestHandler(AbstractRequestHandler):
         parameter = apiRequestParameter().merge(menu, geolocation, radius)
 #        parameter = param.merge(menu, geolocation, radius)
         url = reputationSearchApi().url
-        shop = reputationInfo(url, parameter)
+        api_response = reputationInfo(url, parameter)
 
-        hitcount = shop.hit_count()
-        shop2 = shop.reputation_search()
+        hitcount = api_response.hit_count()
+        shop_reputation = api_response.reputation_search()
         
         session_attr = handler_input.attributes_manager.session_attributes
-        session_attr['shopinfo'] = shop2
-        session_attr['length'] = len(shop2)
+        session_attr['shopinfo'] = shop_reputation
+        session_attr['length'] = len(shop_reputation)
         
-        if shop2:
+        if shop_reputation:
             speak_output = f"{hitcount}件の口コミが見つかりました。"
         else:
             speak_output = 'すみません。お店は見つかりませんでした。'
@@ -87,9 +87,9 @@ class LaunchRequestHandler(AbstractRequestHandler):
             session_attr['q'] = 'no'
             
             for i in range(session_attr['length']):
-                shop_name += '・' + shop2[i]['name'] + '(' + str(shop2[i]['distance']) + 'm)' + '\n'
-                speak_output += shop2[i]['kana'] + '。'
-                speak_output += shop2[i]['comment'] + 'お店までの距離はここから約' + str(shop2[i]['distance']) + 'メートルです。口コミは以上です。' 
+                shop_name += '・' + shop_reputation[i]['name'] + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
+                speak_output += shop_reputation[i]['kana'] + '。'
+                speak_output += shop_reputation[i]['comment'] + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。口コミは以上です。' 
 
             return (handler_input.response_builder
             .speak(speak_output)
@@ -99,9 +99,9 @@ class LaunchRequestHandler(AbstractRequestHandler):
         else:
             speak_output += 'いくつかをご紹介します。'
             for i in range(2):
-                shop_name += '・' + shop2[i]['name'] + '(' + str(shop2[i]['distance']) + 'm)' + '\n'
-                speak_output += shop2[i]['kana'] + '。'
-                speak_output += shop2[i]['comment'] + 'お店まではここから約' + str(shop2[i]['distance']) + 'メートルです。'
+                shop_name += '・' + shop_reputation[i]['name'] + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
+                speak_output += shop_reputation[i]['kana'] + '。'
+                speak_output += shop_reputation[i]['comment'] + 'お店まではここから約' + str(shop_reputation[i]['distance']) + 'メートルです。'
                 
                 session_attr['next'] = 'yes'
                 session_attr['start'] += 1
