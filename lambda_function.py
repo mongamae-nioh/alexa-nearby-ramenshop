@@ -34,7 +34,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         context = handler_input.request_envelope.context
         speak_output = "近くのラーメン屋さんをお知らせします。"
 
-        search_menu = reputationApi().search_menu('ラーメン')
+        menu = reputationApi().search_menu('ラーメン')
 #        apibase = param1.baseinfo()
 
 #        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
@@ -58,10 +58,10 @@ class LaunchRequestHandler(AbstractRequestHandler):
         ## 宮の沢
         #geolocation = geoLocation().set("43.08970911807292", "141.27771842709322")
         
-        area_range = searchRange().set(5)
+        radius = searchRange().set(5) # 3000m
 
-        param = apiRequestParameter()
-        parameter = param.merge(search_menu, geolocation, area_range)
+        parameter = apiRequestParameter().merge(menu, geolocation, radius)
+#        parameter = param.merge(menu, geolocation, radius)
         url = reputationApi().url
         shop = reputationInfo(url, parameter)
 
