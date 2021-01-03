@@ -29,10 +29,9 @@ class restrantSearchApi:
 
 class reputationApi:
     '''口コミAPIリクエストのパラメータ作成'''
-    def __init__(self, menu):
+    def __init__(self):
         self._url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
         self._keyid = keyid
-        self.menu = menu
 
     @property
     def url(self):
@@ -42,10 +41,10 @@ class reputationApi:
     def keyid(self):
         return self._keyid
 
-    def baseinfo(self):
+    def search_menu(self, menu_name):
         baseinfo = {}
         baseinfo['keyid'] = self._keyid
-        baseinfo['menu_name'] = self.menu
+        baseinfo['menu_name'] = menu_name
 
         return baseinfo
 
