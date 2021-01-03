@@ -81,7 +81,7 @@ class apiRequest:
         self.url = url
         self.param = param
     
-    def api_request(self):
+    def api_response(self):
         response = requests.get(self.url, params=self.param)
 
         return response.json()
@@ -89,7 +89,7 @@ class apiRequest:
     def return_code(self):
         """APIに正常終了のコードが存在しないためエラーコードが存在しない場合に正常と判断する(200を返す)"""
         """異常終了時のコードは https://api.gnavi.co.jp/api/manual/photosearch/ 参照"""
-        res = self.api_request()
+        res = self.api_response()
         try:
             error_code = res['gnavi']['error'][0]['code']
             return error_code
@@ -97,13 +97,13 @@ class apiRequest:
             return 200
 
     def hit_count(self):
-        res = self.api_request()
+        res = self.api_response()
         hitcount = res['response']['total_hit_count']
 
         return hitcount
         
     def total_page(self):
-        res = self.api_request()
+        res = self.api_response()
         total_page = math.ceil(res['response']['total_hit_count'] / res['response']['hit_per_page'])
         
         return total_page
@@ -114,7 +114,7 @@ class shopName(apiRequest):
         super().__init__(url, param)
 
     def official_name(self):
-        shop_data = self.api_request()
+        shop_data = self.api_response()
         official_name = shop_data['rest'][0]['name_kana']
 
         return official_name
@@ -132,7 +132,7 @@ class reputationInfo(apiRequest):
         return official_shop_name
 
     def reputation_search(self):
-        shop_data = self.api_request()['response']
+        shop_data = self.api_response()['response']
         per_page = shop_data['hit_per_page']
         hit_count = self.hit_count()
         page = 1
