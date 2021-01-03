@@ -136,103 +136,7 @@ class HelpIntentHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
         speak_output = "現在地の近くにあるラーメン屋さんの口コミを紹介します。"
         return (handler_input.response_builder.speak(speak_output).response)
-
-
-class YesIntentHandler(AbstractRequestHandler):
-    """Yes Intent."""
-    def can_handle(self, handler_input):
-        # type: (HandlerInput) -> bool
-        return (ask_utils.is_intent_name("AMAZON.YesIntent")(handler_input))
-
-    def handle(self, handler_input):
-        # type: (HandlerInput) -> Response
-        session_attr = handler_input.attributes_manager.session_attributes
-        shopinfo = session_attr['shopinfo']
-
-        start = session_attr['shop_index_begin']
-        end = session_attr['shop_index_end']
-        shop_name = ''
-        speak_output = ''
         
-        if session_attr['next_pages'] == 'yes' and session_attr['remaining_reputations'] > 0:
-            if 0 < session_attr['remaining_reputations'] <= referrals_at_once:
-                speak_output += "これが最後の口コミです。"
-                
-            if session_attr['remaining_reputations'] == 1:
-                shop_name    += '・' + shopinfo[str(start)]['name'] + '(' \
-                                + str(shopinfo[str(start)]['distance']) + 'm)' + '\n'
-                speak_output += shopinfo[str(start)]['kana'] + '。' \
-                                + shopinfo[str(start)]['comment'] \
-                                + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。' \
-                                + '口コミは以上です。'
-                                                
-                return (handler_input.response_builder
-                .speak(speak_output)
-                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
-                .response)
-
-            for i in range(start, end):
-                shop_name    += '・' + shopinfo[str(i)]['name'] + '(' \
-                                + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
-                speak_output += shopinfo[str(i)]['kana'] + '。' \
-                                + shopinfo[str(i)]['comment'] \
-                                + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。' \
-                                
-                session_attr['shop_index_begin'] += 1
-                session_attr['next_pages'] = 'yes'
-
-            session_attr['shop_index_end'] = session_attr['shop_index_begin'] + referrals_at_once
-            session_attr['remaining_reputations'] -= referrals_at_once
-
-            if session_attr['remaining_reputations'] <= 0:
-                speak_output += "口コミは以上です。"
-
-                return (handler_input.response_builder
-                .speak(speak_output)
-                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
-                .response)
-                        
-            speak_output += "次の口コミを聞きますか？"
-            ask_output = "そのほかの口コミを聞きますか？"
-
-            return (
-                handler_input.response_builder
-                .speak(speak_output)
-                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
-                .ask(ask_output)
-                .set_should_end_session(False)
-                .response
-                )
-
-class NoIntentHandler(AbstractRequestHandler):
-    """No Intent."""
-    def can_handle(self, handler_input):
-        # type: (HandlerInput) -> bool
-        return (ask_utils.is_intent_name("AMAZON.NoIntent")(handler_input))
-
-    def handle(self, handler_input):
-        # type: (HandlerInput) -> Response
-        speak_output = "わかりました。"
-
-        return (handler_input.response_builder.speak(speak_output).response)
-
-class CancelOrStopIntentHandler(AbstractRequestHandler):
-    """Single handler for Cancel and Stop Intent."""
-    def can_handle(self, handler_input):
-        # type: (HandlerInput) -> bool
-        return (ask_utils.is_intent_name("AMAZON.CancelIntent")(handler_input) or
-                ask_utils.is_intent_name("AMAZON.StopIntent")(handler_input))
-
-    def handle(self, handler_input):
-        # type: (HandlerInput) -> Response
-        speak_output = "わかりました。"
-
-        return (
-            handler_input.response_builder
-                .speak(speak_output)
-                .response
-        )
-
 class GoNextIntentHandler(AbstractRequestHandler):
     """Go Next shoplist Intent."""
     def can_handle(self, handler_input):
@@ -298,6 +202,35 @@ class GoNextIntentHandler(AbstractRequestHandler):
                 .response
                 )
 
+class NoIntentHandler(AbstractRequestHandler):
+    """No Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return (ask_utils.is_intent_name("AMAZON.NoIntent")(handler_input))
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        speak_output = "わかりました。"
+
+        return (handler_input.response_builder.speak(speak_output).response)
+
+class CancelOrStopIntentHandler(AbstractRequestHandler):
+    """Single handler for Cancel and Stop Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return (ask_utils.is_intent_name("AMAZON.CancelIntent")(handler_input) or
+                ask_utils.is_intent_name("AMAZON.StopIntent")(handler_input))
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        speak_output = "わかりました。"
+
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .response
+        )
+
 class SessionEndedRequestHandler(AbstractRequestHandler):
     """Handler for Session End."""
     def can_handle(self, handler_input):
@@ -310,7 +243,6 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
         # Any cleanup logic goes here.
 
         return handler_input.response_builder.response
-
 
 class IntentReflectorHandler(AbstractRequestHandler):
     """The intent reflector is used for interaction model testing and debugging.
@@ -333,7 +265,6 @@ class IntentReflectorHandler(AbstractRequestHandler):
                 # .ask("add a reprompt if you want to keep the session open for the user to respond")
                 .response
         )
-
 
 class CatchAllExceptionHandler(AbstractExceptionHandler):
     """Generic error handling to capture any syntax or routing errors. If you receive an error
@@ -366,11 +297,10 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
 sb = SkillBuilder()
 
 sb.add_request_handler(LaunchRequestHandler())
-sb.add_request_handler(YesIntentHandler())
+sb.add_request_handler(GoNextIntentHandler())
 sb.add_request_handler(NoIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
-sb.add_request_handler(GoNextIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
 sb.add_request_handler(IntentReflectorHandler()) # make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
 
