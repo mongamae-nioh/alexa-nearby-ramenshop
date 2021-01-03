@@ -21,6 +21,8 @@ from shopinfo import reputationSearchApi,geoLocation,searchRange,apiRequestParam
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# 一度の発話で紹介する口コミの数（あまり長いとUXを損ねるため）
+referrals_at_once = 2
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
@@ -53,15 +55,14 @@ class LaunchRequestHandler(AbstractRequestHandler):
         #geolocation = geoLocation().set("43.0555316", "141.3526345")
 
         ## JR琴似駅
-        geolocation = geoLocation().set("43.081898", "141.306774")
+        #geolocation = geoLocation().set("43.081898", "141.306774")
 
         ## 宮の沢
-        #geolocation = geoLocation().set("43.08970911807292", "141.27771842709322")
+        geolocation = geoLocation().set("43.08970911807292", "141.27771842709322")
         
         radius = searchRange().set(5) # 3000m
 
         parameter = apiRequestParameter().merge(menu, geolocation, radius)
-#        parameter = param.merge(menu, geolocation, radius)
         url = reputationSearchApi().url
         api_response = reputationInfo(url, parameter)
 
@@ -70,7 +71,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         
         session_attr = handler_input.attributes_manager.session_attributes
         session_attr['shopinfo'] = shop_reputation
-        session_attr['length'] = len(shop_reputation)
+        session_attr['remaining_reputations'] = len(shop_reputation)
         
         if shop_reputation:
             speak_output = f"{hitcount}件の口コミが見つかりました。"
@@ -78,18 +79,20 @@ class LaunchRequestHandler(AbstractRequestHandler):
             speak_output = 'すみません。お店は見つかりませんでした。'
             return (handler_input.response_builder.speak(speak_output).response)
 
-        session_attr['start'] = 0
+        session_attr['shop_index_begin'] = 0
         
         shop_name = ''
 
-        if session_attr['length'] < 3:
-            session_attr['next'] = 'no'
-            session_attr['q'] = 'no'
+        if session_attr['remaining_reputations'] <= referrals_at_once:
+            session_attr['next_pages'] = 'no'
             
-            for i in range(session_attr['length']):
-                shop_name += '・' + shop_reputation[i]['name'] + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
-                speak_output += shop_reputation[i]['kana'] + '。'
-                speak_output += shop_reputation[i]['comment'] + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。口コミは以上です。' 
+            for i in range(session_attr['remaining_reputations']):
+                shop_name    += '・' + shop_reputation[i]['name'] + '(' \
+                                + str(shop_reputation[i]['distance']) + 'm)' + '\n'
+                speak_output += shop_reputation[i]['kana'] + '。' \
+                                + shop_reputation[i]['comment'] \
+                                + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
+                                + '口コミは以上です。' 
 
             return (handler_input.response_builder
             .speak(speak_output)
@@ -98,18 +101,19 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
         else:
             speak_output += 'いくつかをご紹介します。'
-            for i in range(2):
-                shop_name += '・' + shop_reputation[i]['name'] + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
-                speak_output += shop_reputation[i]['kana'] + '。'
-                speak_output += shop_reputation[i]['comment'] + 'お店まではここから約' + str(shop_reputation[i]['distance']) + 'メートルです。'
+            for i in range(referrals_at_once):
+                shop_name    += '・' + shop_reputation[i]['name'] + '(' \
+                                + str(shop_reputation[i]['distance']) + 'm)' + '\n'
+                speak_output += shop_reputation[i]['kana'] + '。' \
+                                + shop_reputation[i]['comment'] \
+                                + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
                 
-                session_attr['next'] = 'yes'
-                session_attr['start'] += 1
+                session_attr['next_pages'] = 'yes'
+                session_attr['shop_index_begin'] += 1
 
-            session_attr['end'] = session_attr['start'] + 2
-            session_attr['length'] -= 2
+            session_attr['shop_index_end'] = session_attr['shop_index_begin'] + referrals_at_once
+            session_attr['remaining_reputations'] -= referrals_at_once
             speak_output += "次の口コミを聞きますか？"
-            session_attr['q'] = 'yes'
 
             ask_output = "そのほかの口コミを聞きますか？"
 
@@ -145,39 +149,42 @@ class YesIntentHandler(AbstractRequestHandler):
         session_attr = handler_input.attributes_manager.session_attributes
         shopinfo = session_attr['shopinfo']
 
-        start = session_attr['start']
-        end = session_attr['end']
+        start = session_attr['shop_index_begin']
+        end = session_attr['shop_index_end']
+        shop_name = ''
         speak_output = ''
         
-        shop_name = ''
-
-        if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
-            if 0 < session_attr['length'] <= 2:
+        if session_attr['next_pages'] == 'yes' and session_attr['remaining_reputations'] > 0:
+            if 0 < session_attr['remaining_reputations'] <= referrals_at_once:
                 speak_output += "これが最後の口コミです。"
                 
-            if session_attr['length'] == 1:
-                shop_name += '・' + shopinfo[str(start)]['name'] + '(' + str(shopinfo[str(start)]['distance']) + 'm)' + '\n'
-                speak_output += shopinfo[str(start)]['kana'] + '。'
-                speak_output += shopinfo[str(start)]['comment'] + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。'
-                speak_output += "口コミは以上です。"
-
+            if session_attr['remaining_reputations'] == 1:
+                shop_name    += '・' + shopinfo[str(start)]['name'] + '(' \
+                                + str(shopinfo[str(start)]['distance']) + 'm)' + '\n'
+                speak_output += shopinfo[str(start)]['kana'] + '。' \
+                                + shopinfo[str(start)]['comment'] \
+                                + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。' \
+                                + '口コミは以上です。'
+                                                
                 return (handler_input.response_builder
                 .speak(speak_output)
                 .set_card(ui.StandardCard(title="検索結果",text=shop_name))
                 .response)
 
             for i in range(start, end):
-                shop_name += '・' + shopinfo[str(i)]['name'] + '(' + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
-                speak_output += shopinfo[str(i)]['kana'] + '。'
-                speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
-                session_attr['start'] += 1
-                session_attr['next'] = 'yes'
+                shop_name    += '・' + shopinfo[str(i)]['name'] + '(' \
+                                + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
+                speak_output += shopinfo[str(i)]['kana'] + '。' \
+                                + shopinfo[str(i)]['comment'] \
+                                + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。' \
+                                
+                session_attr['shop_index_begin'] += 1
+                session_attr['next_pages'] = 'yes'
 
-            session_attr['end'] = session_attr['start'] + 2
-            session_attr['length'] -= 2
-            session_attr['q'] = 'yes'
+            session_attr['shop_index_end'] = session_attr['shop_index_begin'] + referrals_at_once
+            session_attr['remaining_reputations'] -= referrals_at_once
 
-            if session_attr['length'] <= 0:
+            if session_attr['remaining_reputations'] <= 0:
                 speak_output += "口コミは以上です。"
 
                 return (handler_input.response_builder
@@ -237,38 +244,42 @@ class GoNextIntentHandler(AbstractRequestHandler):
         session_attr = handler_input.attributes_manager.session_attributes
         shopinfo = session_attr['shopinfo']
 
-        start = session_attr['start']
-        end = session_attr['end']
+        start = session_attr['shop_index_begin']
+        end = session_attr['shop_index_end']
         speak_output = ''
         shop_name = ''
 
-        if session_attr['q'] == 'yes' and session_attr['next'] == 'yes' and session_attr['length'] > 0:
-            if 0 < session_attr['length'] <= 2:
+        if session_attr['next_pages'] == 'yes' and session_attr['remaining_reputations'] > 0:
+            if 0 < session_attr['remaining_reputations'] <= referrals_at_once:
                 speak_output += "これが最後の口コミです。"
                 
-            if session_attr['length'] == 1:
-                shop_name += '・' + shopinfo[str(start)]['name'] + '(' + str(shopinfo[str(start)]['distance']) + 'm)' + '\n'
-                speak_output += shopinfo[str(start)]['kana'] + '。'
-                speak_output += shopinfo[str(start)]['comment'] + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。'
-                speak_output += "口コミは以上です。"
-                
+            if session_attr['remaining_reputations'] == 1:
+                shop_name    += '・' + shopinfo[str(start)]['name'] + '(' \
+                                + str(shopinfo[str(start)]['distance']) + 'm)' + '\n'
+                speak_output += shopinfo[str(start)]['kana'] + '。' \
+                                + shopinfo[str(start)]['comment'] \
+                                + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。' \
+                                + '口コミは以上です。'
+                                                
                 return (handler_input.response_builder
                 .speak(speak_output)
                 .set_card(ui.StandardCard(title="検索結果",text=shop_name))
                 .response)
 
             for i in range(start, end):
-                shop_name += '・' + shopinfo[str(i)]['name']  + '(' + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
-                speak_output += shopinfo[str(i)]['kana'] + '。'
-                speak_output += shopinfo[str(i)]['comment'] + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。'
-                session_attr['start'] += 1
-                session_attr['next'] = 'yes'
+                shop_name    += '・' + shopinfo[str(i)]['name'] + '(' \
+                                + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
+                speak_output += shopinfo[str(i)]['kana'] + '。' \
+                                + shopinfo[str(i)]['comment'] \
+                                + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。' \
+                                
+                session_attr['shop_index_begin'] += 1
+                session_attr['next_pages'] = 'yes'
 
-            session_attr['end'] = session_attr['start'] + 2
-            session_attr['length'] -= 2
-            session_attr['q'] = 'yes'
+            session_attr['shop_index_end'] = session_attr['shop_index_begin'] + referrals_at_once
+            session_attr['remaining_reputations'] -= referrals_at_once
 
-            if session_attr['length'] <= 0:
+            if session_attr['remaining_reputations'] <= 0:
                 speak_output += "口コミは以上です。"
                 return (handler_input.response_builder
                 .speak(speak_output)
