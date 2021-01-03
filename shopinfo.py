@@ -7,7 +7,7 @@ import apikey
 keyid = apikey.keyid
 
 class restrantSearchApi:
-    '''レストラン検索APIリクエストのパラメータ作成'''
+    """レストラン検索APIリクエストのパラメータ作成"""
     def __init__(self):
         self._url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
         self._keyid = keyid
@@ -20,7 +20,7 @@ class restrantSearchApi:
     def keyid(self):
         return self._keyid
         
-    def api_request(self, shop_id):
+    def search_by_shop_id(self, shop_id):
         parameter = {}
         parameter['keyid'] = self._keyid
         parameter['id'] = shop_id
@@ -28,7 +28,7 @@ class restrantSearchApi:
         return parameter
 
 class reputationApi:
-    '''口コミAPIリクエストのパラメータ作成'''
+    """口コミAPIリクエストのパラメータ作成"""
     def __init__(self):
         self._url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
         self._keyid = keyid
@@ -49,7 +49,7 @@ class reputationApi:
         return baseinfo
 
 class geoLocation:
-    '''位置情報のパラメータを作成'''
+    """位置情報のパラメータを作成"""
     def set(self, latitude, longitude):
         geolocation = {}
         geolocation['latitude'] = latitude
@@ -58,7 +58,7 @@ class geoLocation:
         return geolocation   
 
 class searchRange:
-    '''検索範囲を指定 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m'''
+    """検索範囲を指定 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m"""
     def set(self, num):
         range = {}
         range['range'] = num
@@ -66,7 +66,7 @@ class searchRange:
         return range
     
 class apiRequestParameter:
-    '''APIリクエストのパラメータとして使うために複数の辞書をマージする'''
+    """APIリクエストのパラメータとして使うために複数の辞書をマージする"""
     def merge(self, *args):
         parameter = {}
 
@@ -76,7 +76,7 @@ class apiRequestParameter:
         return parameter
 
 class apiRequest:
-    '''APIリクエストとレスポンスを返す'''
+    """APIリクエストとレスポンスを返す"""
     def __init__(self, url, param):
         self.url = url
         self.param = param
@@ -87,8 +87,8 @@ class apiRequest:
         return response.json()
 
     def return_code(self):
-        '''APIに正常終了のコードが存在しないためエラーコードが存在しない場合に正常と判断する(200を返す)'''
-        '''異常終了時のコードは https://api.gnavi.co.jp/api/manual/photosearch/ 参照'''
+        """APIに正常終了のコードが存在しないためエラーコードが存在しない場合に正常と判断する(200を返す)"""
+        """異常終了時のコードは https://api.gnavi.co.jp/api/manual/photosearch/ 参照"""
         res = self.api_request()
         try:
             error_code = res['gnavi']['error'][0]['code']
@@ -108,18 +108,29 @@ class apiRequest:
         
         return total_page
 
-class reputationInfo(apiRequest):
-    '''口コミAPIのレスポンスを辞書へ格納する'''
+class shopName(apiRequest):
+    """店名が漢字だと正しく発話されないのでレストラン検索APIから正しい店名をカタカナで取得する"""
     def __init__(self, url, param):
         super().__init__(url, param)
 
-    def shop_kana(self, id):
-        url = restrantSearchApi().url
-        shop_id = restrantSearchApi().api_request(id)
-        shop_kana = shopNameKana(url, shop_id).get_kana()
+    def official_name(self):
+        shop_data = self.api_request()
+        official_name = shop_data['rest'][0]['name_kana']
 
-        return shop_kana
-    
+        return official_name
+
+class reputationInfo(apiRequest):
+    """口コミAPIのレスポンスを辞書へ格納する"""
+    def __init__(self, url, param):
+        super().__init__(url, param)
+
+    def official_shop_name(self, shop_id):
+        url = restrantSearchApi().url
+        shop_id = restrantSearchApi().search_by_shop_id(shop_id)
+        official_shop_name = shopName(url, shop_id).official_name()
+
+        return official_shop_name
+
     def reputation_search(self):
         shop_data = self.api_request()['response']
         per_page = shop_data['hit_per_page']
@@ -133,7 +144,7 @@ class reputationInfo(apiRequest):
                 temp_reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
                         "shop_id": shop_data[str(i)]['photo']['shop_id'],
-                        "kana": self.shop_kana(shop_data[str(i)]['photo']['shop_id']),
+                        "kana": self.official_shop_name(shop_data[str(i)]['photo']['shop_id']),
                         "menu": shop_data[str(i)]['photo']['menu_name'],
                         "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
                         "score": shop_data[str(i)]['photo']['total_score'],
@@ -153,7 +164,7 @@ class reputationInfo(apiRequest):
                     shop_data[str(i)]['photo']['shop_name']: { 
                         "menu": shop_data[str(i)]['photo']['menu_name'],
                         "shop_id": shop_data[str(i)]['photo']['shop_id'],
-                        "kana": self.shop_kana(shop_data[str(i)]['photo']['shop_id']),
+                        "kana": self.official_shop_name(shop_data[str(i)]['photo']['shop_id']),
                         "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
                         "score": shop_data[str(i)]['photo']['total_score'],
                         "distance": shop_data[str(i)]['photo']['distance'],
@@ -179,12 +190,3 @@ class reputationInfo(apiRequest):
             index += 1
         return reputation_info
 
-class shopNameKana(apiRequest):
-    '''レストラン検索APIから店名の読みがなを取得する'''
-    def __init__(self, url, param):
-        super().__init__(url, param)
-
-    def get_kana(self):
-        shop_data = self.api_request()
-        shop_kana = shop_data['rest'][0]['name_kana']
-        return shop_kana
