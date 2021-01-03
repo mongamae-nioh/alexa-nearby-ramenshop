@@ -42,11 +42,11 @@ class reputationSearchApi:
         return self._keyid
 
     def search_by_menu(self, menu_name):
-        baseinfo = {}
-        baseinfo['keyid'] = self._keyid
-        baseinfo['menu_name'] = menu_name
+        parameter = {}
+        parameter['keyid'] = self._keyid
+        parameter['menu_name'] = menu_name
 
-        return baseinfo
+        return parameter
 
 class geoLocation:
     """位置情報のパラメータを作成"""
@@ -96,17 +96,11 @@ class apiRequest:
         except KeyError: # エラーコードが存在しない場合
             return 200
 
-    def hit_count(self):
+    def total_hits(self):
         res = self.api_response()
-        hitcount = res['response']['total_hit_count']
+        total_hits = res['response']['total_hit_count']
 
-        return hitcount
-        
-    def total_page(self):
-        res = self.api_response()
-        total_page = math.ceil(res['response']['total_hit_count'] / res['response']['hit_per_page'])
-        
-        return total_page
+        return total_hits
 
 class shopName(apiRequest):
     """店名が漢字だと正しく発話されないのでレストラン検索APIから正しい店名をカタカナで取得する"""
@@ -134,12 +128,12 @@ class reputationInfo(apiRequest):
     def reputation_search(self):
         shop_data = self.api_response()['response']
         per_page = shop_data['hit_per_page']
-        hit_count = self.hit_count()
+        total_hits = self.total_hits()
         page = 1
 
         temp_reputation_info = {}
         index = 0
-        while hit_count - (page * per_page) > 0:
+        while total_hits - (page * per_page) > 0:
             for i in range(per_page):
                 temp_reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
@@ -158,7 +152,7 @@ class reputationInfo(apiRequest):
             response = requests.get(self.url, params=param)
             shop_data = response.json()['response']
         else:
-            remaining = hit_count - ((page-1) * per_page)
+            remaining = total_hits - ((page-1) * per_page)
             for i in range(remaining):
                 temp_reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
