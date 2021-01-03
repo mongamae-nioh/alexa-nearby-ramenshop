@@ -47,13 +47,13 @@ class LaunchRequestHandler(AbstractRequestHandler):
 #        geolocation = geoLocation().set(latitude, longitude)
 
         ## 平和
-        geolocation = geoLocation().set('43.058377961865624', '141.25509169734372')
+        #geolocation = geoLocation().set('43.058377961865624', '141.25509169734372')
 
         ## すすきの
         #geolocation = geoLocation().set("43.0555316", "141.3526345")
 
         ## JR琴似駅
-        #geolocation = geoLocation().set("43.081898", "141.306774")
+        geolocation = geoLocation().set("43.081898", "141.306774")
 
         ## 宮の沢
         #geolocation = geoLocation().set("43.08970911807292", "141.27771842709322")
@@ -65,7 +65,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         url = reputationSearchApi().url
         api_response = reputationInfo(url, parameter)
 
-        hitcount = api_response.hit_count()
+        hitcount = api_response.total_hits()
         shop_reputation = api_response.reputation_search()
         
         session_attr = handler_input.attributes_manager.session_attributes
