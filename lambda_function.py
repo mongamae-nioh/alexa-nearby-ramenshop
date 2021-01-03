@@ -16,7 +16,7 @@ from ask_sdk_model import ui
 from ask_sdk_model import Response
 
 #import shopinfo
-from shopinfo import reputationApi,geoLocation,searchRange,apiRequestParameter,reputationInfo
+from shopinfo import reputationSearchApi,geoLocation,searchRange,apiRequestParameter,reputationInfo
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -34,7 +34,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         context = handler_input.request_envelope.context
         speak_output = "近くのラーメン屋さんをお知らせします。"
 
-        menu = reputationApi().search_menu('ラーメン')
+        menu = reputationSearchApi().search_by_menu('ラーメン')
 #        apibase = param1.baseinfo()
 
 #        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
@@ -47,13 +47,13 @@ class LaunchRequestHandler(AbstractRequestHandler):
 #        geolocation = geoLocation().set(latitude, longitude)
 
         ## 平和
-        #geolocation = geoLocation().set('43.058377961865624', '141.25509169734372')
+        geolocation = geoLocation().set('43.058377961865624', '141.25509169734372')
 
         ## すすきの
         #geolocation = geoLocation().set("43.0555316", "141.3526345")
 
         ## JR琴似駅
-        geolocation = geoLocation().set("43.081898", "141.306774")
+        #geolocation = geoLocation().set("43.081898", "141.306774")
 
         ## 宮の沢
         #geolocation = geoLocation().set("43.08970911807292", "141.27771842709322")
@@ -62,7 +62,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
         parameter = apiRequestParameter().merge(menu, geolocation, radius)
 #        parameter = param.merge(menu, geolocation, radius)
-        url = reputationApi().url
+        url = reputationSearchApi().url
         shop = reputationInfo(url, parameter)
 
         hitcount = shop.hit_count()
