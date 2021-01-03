@@ -34,8 +34,8 @@ class LaunchRequestHandler(AbstractRequestHandler):
         context = handler_input.request_envelope.context
         speak_output = "近くのラーメン屋さんをお知らせします。"
 
-        param1 = reputationApi('ラーメン')
-        apibase = param1.baseinfo()
+        search_menu = reputationApi().search_menu('ラーメン')
+#        apibase = param1.baseinfo()
 
 #        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
 #        if isgeosupported:
@@ -44,27 +44,25 @@ class LaunchRequestHandler(AbstractRequestHandler):
 #        latitude = context.geolocation.coordinate.latitude_in_degrees
 #        longitude = context.geolocation.coordinate.longitude_in_degrees
 
-        param2 = geoLocation()
-#        geolocation = param2.set(latitude, longitude)
+#        geolocation = geoLocation().set(latitude, longitude)
 
         ## 平和
-        #geolocation = param2.set('43.058377961865624', '141.25509169734372')
+        #geolocation = geoLocation.set('43.058377961865624', '141.25509169734372')
 
         ## すすきの
-        #geolocation = param2.set("43.0555316", "141.3526345")
+        #geolocation = geoLocation.set("43.0555316", "141.3526345")
 
         ## JR琴似駅
-        geolocation = param2.set("43.081898", "141.306774")
+        geolocation = geoLocation.set("43.081898", "141.306774")
 
         ## 宮の沢
-        #geolocation = param2.set("43.08970911807292", "141.27771842709322")
+        #geolocation = geoLocation.set("43.08970911807292", "141.27771842709322")
         
-        param = apiRequestParameter()
         area_range = searchRange().set(5)
-        parameter = param.merge(apibase, geolocation, area_range)
-        url = param1.url
 
-        #shop = restrantInfo(url, parameter)
+        param = apiRequestParameter()
+        parameter = param.merge(search_menu, geolocation, area_range)
+        url = reputationApi().url
         shop = reputationInfo(url, parameter)
 
         hitcount = shop.hit_count()
