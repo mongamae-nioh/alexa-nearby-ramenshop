@@ -36,12 +36,12 @@ class LaunchRequestHandler(AbstractRequestHandler):
         context = handler_input.request_envelope.context
         speak_output = "近くのラーメン屋さんをお知らせします。"
 
-        menu = reputationSearchApi().search_by_menu('ラーメン')
-#        apibase = param1.baseinfo()
-
 #        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
 #        if isgeosupported:
 #            print('geolocation is supported.')
+
+        # API request and response
+        menu = reputationSearchApi().search_by_menu('ラーメン')
 
 #        latitude = context.geolocation.coordinate.latitude_in_degrees
 #        longitude = context.geolocation.coordinate.longitude_in_degrees
@@ -80,7 +80,6 @@ class LaunchRequestHandler(AbstractRequestHandler):
             return (handler_input.response_builder.speak(speak_output).response)
 
         session_attr['shop_index_begin'] = 0
-        
         shop_name = ''
 
         if session_attr['remaining_reputations'] <= referrals_at_once:
