@@ -35,10 +35,18 @@ class LaunchRequestHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
         context = handler_input.request_envelope.context
         speak_output = "近くのラーメン屋さんをお知らせします。"
-
-#        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
-#        if isgeosupported:
-#            print('geolocation is supported.')
+        
+        # Check if the device is allowed to get location information
+        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
+        if not isgeosupported:
+            speak_output = "このスキルは位置情報を使います。Alexaアプリで許可してください。"
+#            print('geolocation is not supported.')
+            
+            return (handler_input.response_builder
+            .speak(speak_output)
+            .set_should_end_session(False)
+            .response
+            )
 
         # API request and response
         menu = reputationSearchApi().search_by_menu('ラーメン')
@@ -135,7 +143,7 @@ class HelpIntentHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
         speak_output = "現在地の近くにあるラーメン屋さんの口コミを紹介します。"
         return (handler_input.response_builder.speak(speak_output).response)
-        
+
 class GoNextIntentHandler(AbstractRequestHandler):
     """Go Next shoplist Intent."""
     def can_handle(self, handler_input):
