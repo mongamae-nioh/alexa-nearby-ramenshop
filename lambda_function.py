@@ -67,11 +67,11 @@ class LaunchRequestHandler(AbstractRequestHandler):
         #geolocation = geoLocation().set("43.081898", "141.306774")
 
         ## 宮の沢
-        geolocation = geoLocation().set("43.08970911807292", "141.27771842709322")
+        geolocation = geoLocation.set("43.08970911807292", "141.27771842709322")
         
-        radius = searchRange().set(5) # 3000m
+        radius = searchRange.set(5) # 3000m
 
-        parameter = apiRequestParameter().merge(menu, geolocation, radius)
+        parameter = apiRequestParameter.merge(menu, geolocation, radius)
         url = api.url
         api_response = reputationInfo(url, parameter)
 
