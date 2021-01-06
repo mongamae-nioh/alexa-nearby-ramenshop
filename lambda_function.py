@@ -28,6 +28,9 @@ referrals_at_once = 2
 # 位置情報の共有を許可するよう促すカードを表示する関数の引数
 permissions = ["alexa::devices:all:geolocation:read"]
 
+# 何のお店を探すか
+search_menu = 'ラーメン'
+
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
     def can_handle(self, handler_input):
@@ -36,11 +39,9 @@ class LaunchRequestHandler(AbstractRequestHandler):
         return ask_utils.is_request_type("LaunchRequest")(handler_input)
 
     def handle(self, handler_input):
-        # type: (HandlerInput) -> Response
+        # type: (HandlerInput) -> Response     
+        # デバイスが位置情報取得に対応しているか、Alexaアプリが位置情報の共有を許可しているかチェック
         context = handler_input.request_envelope.context
-        speak_output = "近くのラーメン屋さんをお知らせします。"
-        
-        # Check if the device supports location information or device is allowed to get location
         isgeosupported = context.system.device.supported_interfaces.geolocation
         getobject = context.geolocation
         if isgeosupported is None or getobject is None:
@@ -55,29 +56,20 @@ class LaunchRequestHandler(AbstractRequestHandler):
                 .response
             )
 
-        # API request and response
+        # APIへリクエストするときのパラメータ作成
         api = ReputationSearchApiParameter()
-        menu = api.search_by_menu('ラーメン')
+
+        menu = api.search_by_menu(search_menu)
 
         latitude = context.geolocation.coordinate.latitude_in_degrees
         longitude = context.geolocation.coordinate.longitude_in_degrees
         geolocation = GeoLocation.set(latitude, longitude)
 
-        ## 平和
-        #geolocation = GeoLocation.set('43.058377961865624', '141.25509169734372')
-
-        ## すすきの
-        #geolocation = GeoLocation.set("43.0555316", "141.3526345")
-
-        ## JR琴似駅
-        #geolocation = GeoLocation.set("43.081898", "141.306774")
-
-        ## 宮の沢
-        #geolocation = GeoLocation.set("43.08970911807292", "141.27771842709322")
-        
         radius = SearchRange.set(5) # 3000m
 
         parameter = ApiRequestParameter.merge(menu, geolocation, radius)
+
+        # APIから取得
         url = api.url
         api_response = ReputationInfo(url, parameter)
 
@@ -295,12 +287,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
 
         speak_output = "すみません。よくわかりませんでした。"
 
-        return (
-            handler_input.response_builder
-                .speak(speak_output)
-                .ask(speak_output)
-                .response
-        )
+        return (handler_input.response_builder.speak(speak_output).response)
 
 # The SkillBuilder object acts as the entry point for your skill, routing all request and response
 # payloads to the handlers above. Make sure any new handlers or interceptors you've
