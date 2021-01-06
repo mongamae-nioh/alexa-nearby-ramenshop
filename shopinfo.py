@@ -6,7 +6,7 @@ import apikey
 
 keyid = apikey.keyid
 
-class restrantSearchApi:
+class RestrantSearchApi:
     """レストラン検索APIリクエストのパラメータ作成"""
     def __init__(self):
         self._url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
@@ -27,7 +27,7 @@ class restrantSearchApi:
         
         return parameter
 
-class reputationSearchApi:
+class ReputationSearchApi:
     """口コミAPIリクエストのパラメータ作成"""
     def __init__(self):
         self._url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
@@ -48,7 +48,7 @@ class reputationSearchApi:
 
         return parameter
 
-class geoLocation:
+class GeoLocation:
     """位置情報のパラメータを作成"""
     @classmethod
     def set(self, latitude, longitude):
@@ -58,7 +58,7 @@ class geoLocation:
 
         return geolocation   
 
-class searchRange:
+class SearchRange:
     """検索範囲を指定 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m"""
     @classmethod
     def set(self, num):
@@ -67,7 +67,7 @@ class searchRange:
 
         return range
     
-class apiRequestParameter:
+class ApiRequestParameter:
     """APIリクエストのパラメータとして使うために複数の辞書をマージする"""
     @classmethod
     def merge(self, *args):
@@ -78,7 +78,7 @@ class apiRequestParameter:
         
         return parameter
 
-class apiRequest:
+class ApiRequest:
     """APIリクエストとレスポンスを返す"""
     def __init__(self, url, param):
         self.url = url
@@ -105,7 +105,7 @@ class apiRequest:
 
         return total_hits
 
-class shopName(apiRequest):
+class ShopName(ApiRequest):
     """店名が漢字だと正しく発話されないのでレストラン検索APIから正しい店名をカタカナで取得する"""
     def __init__(self, url, param):
         super().__init__(url, param)
@@ -116,15 +116,15 @@ class shopName(apiRequest):
 
         return official_name
 
-class reputationInfo(apiRequest):
+class ReputationInfo(ApiRequest):
     """口コミAPIのレスポンスを辞書へ格納する"""
     def __init__(self, url, param):
         super().__init__(url, param)
 
     def official_shop_name(self, shop_id):
-        url = restrantSearchApi().url
-        shop_id = restrantSearchApi().search_by_shop_id(shop_id)
-        official_shop_name = shopName(url, shop_id).official_name()
+        url = RestrantSearchApi().url
+        shop_id = RestrantSearchApi().search_by_shop_id(shop_id)
+        official_shop_name = ShopName(url, shop_id).official_name()
 
         return official_shop_name
 
