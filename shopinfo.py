@@ -50,6 +50,7 @@ class reputationSearchApi:
 
 class geoLocation:
     """位置情報のパラメータを作成"""
+    @classmethod
     def set(self, latitude, longitude):
         geolocation = {}
         geolocation['latitude'] = latitude
@@ -59,6 +60,7 @@ class geoLocation:
 
 class searchRange:
     """検索範囲を指定 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m"""
+    @classmethod
     def set(self, num):
         range = {}
         range['range'] = num
@@ -67,6 +69,7 @@ class searchRange:
     
 class apiRequestParameter:
     """APIリクエストのパラメータとして使うために複数の辞書をマージする"""
+    @classmethod
     def merge(self, *args):
         parameter = {}
 
@@ -95,7 +98,7 @@ class apiRequest:
             return error_code
         except KeyError: # エラーコードが存在しない場合
             return 200
-
+    
     def total_hits(self):
         res = self.api_response()
         total_hits = res['response']['total_hit_count']
@@ -106,7 +109,7 @@ class shopName(apiRequest):
     """店名が漢字だと正しく発話されないのでレストラン検索APIから正しい店名をカタカナで取得する"""
     def __init__(self, url, param):
         super().__init__(url, param)
-
+        
     def official_name(self):
         shop_data = self.api_response()
         official_name = shop_data['rest'][0]['name_kana']
