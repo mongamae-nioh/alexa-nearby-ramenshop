@@ -75,7 +75,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         url = api.url
         api_response = ReputationInfo(url, parameter)
 
-        hitcount = api_response.total_hits()
+        hitcount = api_response.total_hits
         shop_reputation = api_response.reputation_search()
         
         session_attr = handler_input.attributes_manager.session_attributes
@@ -102,10 +102,12 @@ class LaunchRequestHandler(AbstractRequestHandler):
                                 + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
                                 + '口コミは以上です。' 
 
-            return (handler_input.response_builder
-            .speak(speak_output)
-            .set_card(ui.StandardCard(title="検索結果",text=shop_name))
-            .response)
+            return (
+                handler_input.response_builder
+                .speak(speak_output)
+                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                .response
+                )
 
         else:
             speak_output += 'いくつかをご紹介します。'
@@ -173,10 +175,12 @@ class GoNextIntentHandler(AbstractRequestHandler):
                                 + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。' \
                                 + '口コミは以上です。'
                                                 
-                return (handler_input.response_builder
-                .speak(speak_output)
-                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
-                .response)
+                return (
+                    handler_input.response_builder
+                    .speak(speak_output)
+                    .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                    .response
+                    )
 
             for i in range(start, end):
                 shop_name    += '・' + shopinfo[str(i)]['name'] + '(' \
@@ -193,10 +197,12 @@ class GoNextIntentHandler(AbstractRequestHandler):
 
             if session_attr['remaining_reputations'] <= 0:
                 speak_output += "口コミは以上です。"
-                return (handler_input.response_builder
-                .speak(speak_output)
-                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
-                .response)
+                return (
+                    handler_input.response_builder
+                    .speak(speak_output)
+                    .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                    .response
+                    )
                         
             speak_output += "次の口コミを聞きますか？"
             ask_output = "そのほかの口コミを聞きますか？"
@@ -236,11 +242,7 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
         speak_output = "わかりました。"
 
-        return (
-            handler_input.response_builder
-                .speak(speak_output)
-                .response
-        )
+        return (handler_input.response_builder.speak(speak_output).response)
 
 class SessionEndedRequestHandler(AbstractRequestHandler):
     """Handler for Session End."""
@@ -250,7 +252,6 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-
         # Any cleanup logic goes here.
 
         return handler_input.response_builder.response
@@ -270,12 +271,7 @@ class IntentReflectorHandler(AbstractRequestHandler):
         intent_name = ask_utils.get_intent_name(handler_input)
         speak_output = "You just triggered " + intent_name + "."
 
-        return (
-            handler_input.response_builder
-                .speak(speak_output)
-                # .ask("add a reprompt if you want to keep the session open for the user to respond")
-                .response
-        )
+        return (handler_input.response_builder.speak(speak_output).response)
 
 class CatchAllExceptionHandler(AbstractExceptionHandler):
     """Generic error handling to capture any syntax or routing errors. If you receive an error
@@ -303,7 +299,6 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
 # The SkillBuilder object acts as the entry point for your skill, routing all request and response
 # payloads to the handlers above. Make sure any new handlers or interceptors you've
 # defined are included below. The order matters - they're processed top to bottom.
-
 
 sb = SkillBuilder()
 
