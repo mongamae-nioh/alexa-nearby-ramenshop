@@ -37,19 +37,20 @@ class LaunchRequestHandler(AbstractRequestHandler):
         speak_output = "近くのラーメン屋さんをお知らせします。"
         
         # Check if the device is allowed to get location information
-        isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
-        if not isgeosupported:
-            speak_output = "このスキルは位置情報を使います。Alexaアプリで許可してください。"
+        #isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
+        #if not isgeosupported:
+        #    speak_output = "このスキルは位置情報を使います。Alexaアプリで許可してください。"
 #            print('geolocation is not supported.')
             
-            return (handler_input.response_builder
-            .speak(speak_output)
-            .set_should_end_session(False)
-            .response
-            )
+        #    return (handler_input.response_builder
+        #    .speak(speak_output)
+        #    .set_should_end_session(False)
+        #    .response
+        #    )
 
         # API request and response
-        menu = reputationSearchApi().search_by_menu('ラーメン')
+        api = reputationSearchApi()
+        menu = api.search_by_menu('ラーメン')
 
 #        latitude = context.geolocation.coordinate.latitude_in_degrees
 #        longitude = context.geolocation.coordinate.longitude_in_degrees
@@ -71,7 +72,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         radius = searchRange().set(5) # 3000m
 
         parameter = apiRequestParameter().merge(menu, geolocation, radius)
-        url = reputationSearchApi().url
+        url = api.url
         api_response = reputationInfo(url, parameter)
 
         hitcount = api_response.total_hits()
@@ -208,6 +209,9 @@ class GoNextIntentHandler(AbstractRequestHandler):
                 .set_should_end_session(False)
                 .response
                 )
+        else:
+            speak_output = 'すみません。よくわかりませんでした。'
+            return (handler_input.response_builder.speak(speak_output).response)
 
 class NoIntentHandler(AbstractRequestHandler):
     """No Intent."""
