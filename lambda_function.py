@@ -16,7 +16,7 @@ from ask_sdk_model import ui
 from ask_sdk_model import Response
 
 #import shopinfo
-from shopinfo import reputationSearchApi,geoLocation,searchRange,apiRequestParameter,reputationInfo
+from shopinfo import ReputationSearchApi,GeoLocation,SearchRange,ApiRequestParameter,ReputationInfo
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -49,31 +49,31 @@ class LaunchRequestHandler(AbstractRequestHandler):
         #    )
 
         # API request and response
-        api = reputationSearchApi()
+        api = ReputationSearchApi()
         menu = api.search_by_menu('ラーメン')
 
 #        latitude = context.geolocation.coordinate.latitude_in_degrees
 #        longitude = context.geolocation.coordinate.longitude_in_degrees
 
-#        geolocation = geoLocation().set(latitude, longitude)
+#        geolocation = GeoLocation().set(latitude, longitude)
 
         ## 平和
-        #geolocation = geoLocation().set('43.058377961865624', '141.25509169734372')
+        #geolocation = GeoLocation().set('43.058377961865624', '141.25509169734372')
 
         ## すすきの
-        #geolocation = geoLocation().set("43.0555316", "141.3526345")
+        #geolocation = GeoLocation().set("43.0555316", "141.3526345")
 
         ## JR琴似駅
-        #geolocation = geoLocation().set("43.081898", "141.306774")
+        #geolocation = GeoLocation().set("43.081898", "141.306774")
 
         ## 宮の沢
-        geolocation = geoLocation.set("43.08970911807292", "141.27771842709322")
+        geolocation = GeoLocation.set("43.08970911807292", "141.27771842709322")
         
-        radius = searchRange.set(5) # 3000m
+        radius = SearchRange.set(5) # 3000m
 
-        parameter = apiRequestParameter.merge(menu, geolocation, radius)
+        parameter = ApiRequestParameter.merge(menu, geolocation, radius)
         url = api.url
-        api_response = reputationInfo(url, parameter)
+        api_response = ReputationInfo(url, parameter)
 
         hitcount = api_response.total_hits()
         shop_reputation = api_response.reputation_search()
