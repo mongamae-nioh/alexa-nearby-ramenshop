@@ -6,8 +6,8 @@ import apikey
 
 keyid = apikey.keyid
 
-class RestrantSearchApi:
-    """レストラン検索APIリクエストのパラメータ作成"""
+class RestrantSearchApiParameter:
+    """レストラン検索APIリクエストのパラメータ"""
     def __init__(self):
         self._url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
         self._keyid = keyid
@@ -27,8 +27,8 @@ class RestrantSearchApi:
         
         return parameter
 
-class ReputationSearchApi:
-    """口コミAPIリクエストのパラメータ作成"""
+class ReputationSearchApiParameter:
+    """口コミAPIリクエストのパラメータ"""
     def __init__(self):
         self._url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
         self._keyid = keyid
@@ -49,7 +49,7 @@ class ReputationSearchApi:
         return parameter
 
 class GeoLocation:
-    """位置情報のパラメータを作成"""
+    """位置情報のパラメータ"""
     @classmethod
     def set(self, latitude, longitude):
         geolocation = {}
@@ -59,7 +59,7 @@ class GeoLocation:
         return geolocation   
 
 class SearchRange:
-    """検索範囲を指定 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m"""
+    """検索範囲のパラメータ 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m"""
     @classmethod
     def set(self, num):
         range = {}
@@ -68,7 +68,7 @@ class SearchRange:
         return range
     
 class ApiRequestParameter:
-    """APIリクエストのパラメータとして使うために複数の辞書をマージする"""
+    """APIリクエストのパラメータとして使うために複数の辞書をマージ"""
     @classmethod
     def merge(self, *args):
         parameter = {}
@@ -79,7 +79,6 @@ class ApiRequestParameter:
         return parameter
 
 class ApiRequest:
-    """APIリクエストとレスポンスを返す"""
     def __init__(self, url, param):
         self.url = url
         self.param = param
@@ -107,7 +106,7 @@ class ApiRequest:
         return total_hits
 
 class ShopName(ApiRequest):
-    """店名が漢字だと正しく発話されないのでレストラン検索APIから正しい店名をカタカナで取得する"""
+    """漢字の店名は正しく発話されないことがあるのでレストラン検索APIから正式な店名を取得する"""
     def __init__(self, url, param):
         super().__init__(url, param)
         
@@ -118,13 +117,13 @@ class ShopName(ApiRequest):
         return official_name
 
 class ReputationInfo(ApiRequest):
-    """口コミAPIのレスポンスを辞書へ格納する"""
+    """状態遷移をセッションアトリビュートで管理するためAPIからのレスポンスをDynamoDBへ格納する"""
     def __init__(self, url, param):
         super().__init__(url, param)
 
     def official_shop_name(self, shop_id):
-        url = RestrantSearchApi().url
-        shop_id = RestrantSearchApi().search_by_shop_id(shop_id)
+        url = RestrantSearchApiParameter().url
+        shop_id = RestrantSearchApiParameter().search_by_shop_id(shop_id)
         official_shop_name = ShopName(url, shop_id).official_name()
 
         return official_shop_name
