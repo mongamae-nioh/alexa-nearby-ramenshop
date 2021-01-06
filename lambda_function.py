@@ -12,6 +12,7 @@ from ask_sdk_core.dispatch_components import AbstractRequestHandler
 from ask_sdk_core.dispatch_components import AbstractExceptionHandler
 from ask_sdk_core.handler_input import HandlerInput
 from ask_sdk_model import ui
+#from ask_sdk_model.ui import AskForPermissionsConsentCard
 
 from ask_sdk_model import Response
 
@@ -23,6 +24,9 @@ logger.setLevel(logging.INFO)
 
 # 一度の発話で紹介する口コミの数（あまり長いとUXを損ねるため）
 referrals_at_once = 2
+
+# 位置情報の共有を許可するよう促すカードを表示する関数の引数
+permissions = ["alexa::devices:all:geolocation:read"]
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
@@ -36,38 +40,40 @@ class LaunchRequestHandler(AbstractRequestHandler):
         context = handler_input.request_envelope.context
         speak_output = "近くのラーメン屋さんをお知らせします。"
         
-        # Check if the device is allowed to get location information
-        #isgeosupported = handler_input.request_envelope.context.system.device.supported_interfaces.geolocation
-        #if not isgeosupported:
-        #    speak_output = "このスキルは位置情報を使います。Alexaアプリで許可してください。"
-#            print('geolocation is not supported.')
+        # Check if the device supports location information or device is allowed to get location
+        isgeosupported = context.system.device.supported_interfaces.geolocation
+        getobject = context.geolocation
+        if isgeosupported is None or getobject is None:
+            speak_output = "このスキルは、位置情報を使用します。\
+                位置情報の共有を有効にするには、Alexaアプリに移動し、権限を有効にしてください。\
+                なお、固定デバイスの場合は位置情報を取得するようには設定されていないため、このスキルを使うことはできません。"
             
-        #    return (handler_input.response_builder
-        #    .speak(speak_output)
-        #    .set_should_end_session(False)
-        #    .response
-        #    )
+            return (
+                handler_input.response_builder
+                .speak(speak_output)
+                .set_card(ui.AskForPermissionsConsentCard(permissions=permissions))
+                .response
+            )
 
         # API request and response
         api = ReputationSearchApiParameter()
         menu = api.search_by_menu('ラーメン')
 
-#        latitude = context.geolocation.coordinate.latitude_in_degrees
-#        longitude = context.geolocation.coordinate.longitude_in_degrees
-
-#        geolocation = GeoLocation().set(latitude, longitude)
+        latitude = context.geolocation.coordinate.latitude_in_degrees
+        longitude = context.geolocation.coordinate.longitude_in_degrees
+        geolocation = GeoLocation.set(latitude, longitude)
 
         ## 平和
-        #geolocation = GeoLocation().set('43.058377961865624', '141.25509169734372')
+        #geolocation = GeoLocation.set('43.058377961865624', '141.25509169734372')
 
         ## すすきの
-        #geolocation = GeoLocation().set("43.0555316", "141.3526345")
+        #geolocation = GeoLocation.set("43.0555316", "141.3526345")
 
         ## JR琴似駅
-        #geolocation = GeoLocation().set("43.081898", "141.306774")
+        #geolocation = GeoLocation.set("43.081898", "141.306774")
 
         ## 宮の沢
-        geolocation = GeoLocation.set("43.08970911807292", "141.27771842709322")
+        #geolocation = GeoLocation.set("43.08970911807292", "141.27771842709322")
         
         radius = SearchRange.set(5) # 3000m
 
@@ -85,7 +91,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         if shop_reputation:
             speak_output = f"{hitcount}件の口コミが見つかりました。"
         else:
-            speak_output = 'すみません。お店は見つかりませんでした。'
+            speak_output = 'すみません。お店の口コミは見つかりませんでした。'
             return (handler_input.response_builder.speak(speak_output).response)
 
         session_attr['shop_index_begin'] = 0
@@ -144,11 +150,12 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "現在地の近くにあるラーメン屋さんの口コミを紹介します。"
+        speak_output = "現在地の近くにあるラーメン屋さんの口コミをご紹介します。"
         return (handler_input.response_builder.speak(speak_output).response)
 
 class GoNextIntentHandler(AbstractRequestHandler):
-    """Go Next shoplist Intent."""
+    """店の情報を読み上げている途中で「次」、あるいは次の店の情報を聞くかという質問に「はい」と答えたときに呼び出されるインテント"""
+    """次のお店情報を読み上げる。店舗情報があるうちは繰り返し呼び出しが可能"""
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         return ask_utils.is_intent_name("GoNextIntent")(handler_input)
@@ -292,7 +299,6 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
             handler_input.response_builder
                 .speak(speak_output)
                 .ask(speak_output)
-                .set_should_end_session(False)
                 .response
         )
 
