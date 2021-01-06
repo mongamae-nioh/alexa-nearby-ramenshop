@@ -99,6 +99,7 @@ class ApiRequest:
         except KeyError: # エラーコードが存在しない場合
             return 200
     
+    @property
     def total_hits(self):
         res = self.api_response()
         total_hits = res['response']['total_hit_count']
@@ -131,7 +132,7 @@ class ReputationInfo(ApiRequest):
     def reputation_search(self):
         shop_data = self.api_response()['response']
         per_page = shop_data['hit_per_page']
-        total_hits = self.total_hits()
+        total_hits = self.total_hits
         page = 1
 
         temp_reputation_info = {}
