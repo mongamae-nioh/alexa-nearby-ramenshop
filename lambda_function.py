@@ -16,7 +16,7 @@ from ask_sdk_model import ui
 from ask_sdk_model import Response
 
 #import shopinfo
-from shopinfo import ReputationSearchApi,GeoLocation,SearchRange,ApiRequestParameter,ReputationInfo
+from shopinfo import ReputationSearchApiParameter,GeoLocation,SearchRange,ApiRequestParameter,ReputationInfo
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -49,7 +49,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         #    )
 
         # API request and response
-        api = ReputationSearchApi()
+        api = ReputationSearchApiParameter()
         menu = api.search_by_menu('ラーメン')
 
 #        latitude = context.geolocation.coordinate.latitude_in_degrees
