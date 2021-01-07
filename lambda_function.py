@@ -40,27 +40,33 @@ class LaunchRequestHandler(AbstractRequestHandler):
         context = handler_input.request_envelope.context
         isgeosupported = context.system.device.supported_interfaces.geolocation
         geo_object = context.geolocation
-        if isgeosupported is None or geo_object is None:
-            speak_output = "このスキルは、位置情報を使用します。\
-                位置情報の共有を有効にするには、Alexaアプリに移動し、権限を有効にしてください。\
-                なお、固定デバイスの場合は位置情報を取得するようには設定されていないため、このスキルはお使いになれません。"
-            
-            return (
-                handler_input.response_builder
-                .speak(speak_output)
-                .set_card(ui.AskForPermissionsConsentCard(permissions=permissions))
-                .response
-            )
+#        if isgeosupported is None or geo_object is None:
+#            speak_output = "このスキルは、位置情報を使用します。\
+#                位置情報の共有を有効にするには、Alexaアプリに移動し、権限を有効にしてください。\
+#                なお、固定デバイスの場合は位置情報を取得するようには設定されていないため、このスキルはお使いになれません。"
+#            
+#            return (
+#                handler_input.response_builder
+#                .speak(speak_output)
+#                .set_card(ui.AskForPermissionsConsentCard(permissions=permissions))
+#                .response
+#            )
 
         # APIのリクエストパラメータ作成
         api = ReputationSearchApiParameter()
 
         menu = api.search_by_menu(search_menu)
 
-        latitude = context.geolocation.coordinate.latitude_in_degrees
-        longitude = context.geolocation.coordinate.longitude_in_degrees
-        geolocation = GeoLocation.set(latitude, longitude)
+#        latitude = context.geolocation.coordinate.latitude_in_degrees
+#        longitude = context.geolocation.coordinate.longitude_in_degrees
+#        geolocation = GeoLocation.set(latitude, longitude)
 
+        ## 宮の沢
+        geolocation = GeoLocation.set("43.08970911807292", "141.27771842709322")
+        
+        ## ヒット無し
+#        geolocation = GeoLocation.set("43.11111111", "141.111111")
+        
         radius = SearchRange.set(5) # 3000m
 
         parameter = ApiRequestParameter.merge(menu, geolocation, radius)
@@ -68,21 +74,20 @@ class LaunchRequestHandler(AbstractRequestHandler):
         # APIレスポンス
         url = api.url
         api_response = ReputationInfo(url, parameter)
-
-        hitcount = api_response.total_hits
-        shop_reputation = api_response.reputation_search()
         return_code = api_response.return_code()
 
-        if shop_reputation and return_code == 200: # APIリクエストが正常終了
+        if return_code == 200: # APIリクエストが正常終了
+            shop_reputation = api_response.reputation_search()
+            hitcount = api_response.total_hits
+
+            session_attr = handler_input.attributes_manager.session_attributes
+            session_attr['shopinfo'] = shop_reputation
+            session_attr['remaining_reputations'] = len(shop_reputation)
+            session_attr['shop_index_begin'] = 0
             speak_output = f"{hitcount}件の口コミが見つかりました。"
         else:
             speak_output = 'すみません。お店の口コミは見つかりませんでした。'
             return (handler_input.response_builder.speak(speak_output).response)
-
-        session_attr = handler_input.attributes_manager.session_attributes
-        session_attr['shopinfo'] = shop_reputation
-        session_attr['remaining_reputations'] = len(shop_reputation)
-        session_attr['shop_index_begin'] = 0
 
         shop_name = ''
         if session_attr['remaining_reputations'] <= referrals_at_once:
@@ -178,8 +183,8 @@ class GoNextIntentHandler(AbstractRequestHandler):
                     )
 
             for i in range(start, end):
-                shop_name    += '・' + shop_reputation[i]['name'] \
-                                + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
+                shop_name    += '・' + shopinfo[str(i)]['name'] + '(' \
+                                + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
                 speak_output += shopinfo[str(i)]['kana'] + '。' \
                                 + shopinfo[str(i)]['comment'] \
                                 + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。' \
