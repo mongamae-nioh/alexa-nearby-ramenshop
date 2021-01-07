@@ -141,7 +141,7 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "現在地の近くにあるラーメン屋さんの口コミをご紹介します。"
+        speak_output = f"現在地から近い{search_menu}屋さんの口コミをご紹介します。"
         return (handler_input.response_builder.speak(speak_output).response)
 
 class GoNextIntentHandler(AbstractRequestHandler):
