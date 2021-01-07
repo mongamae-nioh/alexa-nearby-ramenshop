@@ -21,6 +21,9 @@ logger.setLevel(logging.INFO)
 # 位置情報の共有を許可するように促すカードをAlexaアプリへ表示する関数の引数
 permissions = ["alexa::devices:all:geolocation:read"]
 
+# Alexaアプリのカードや画面付きデバイスへ表示するタイトル
+card_title = "紹介したお店と現在地からの距離"
+
 # 探したいメニュー名
 search_menu = 'ラーメン'
 
@@ -101,13 +104,13 @@ class LaunchRequestHandler(AbstractRequestHandler):
                                 + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
                 speak_output += shop_reputation[i]['kana'] + '。' \
                                 + shop_reputation[i]['comment'] \
-                                + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
+                                + 'お店まではここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
                                 + '口コミは以上です。' 
 
             return (
                 handler_input.response_builder
                 .speak(speak_output)
-                .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
+                .set_card(ui.StandardCard(title=card_title,text=shop_name))
                 .response
                 )
 
@@ -122,7 +125,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
             for i in range(referrals_at_once):
                 speak_output += shop_reputation[i]['kana'] + '。' \
                                 + shop_reputation[i]['comment'] \
-                                + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
+                                + 'お店まではここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
                 
                 session_attr['next_pages'] = 'yes'
                 session_attr['shop_index_begin'] += 1
@@ -136,7 +139,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
             return (
                 handler_input.response_builder
                 .speak(speak_output)
-                .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
+                .set_card(ui.StandardCard(title=card_title,text=shop_name))
                 .ask(ask_output)
                 .set_should_end_session(False)
                 .response
@@ -183,7 +186,7 @@ class GoNextIntentHandler(AbstractRequestHandler):
                 return (
                     handler_input.response_builder
                     .speak(speak_output)
-                    .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
+                    .set_card(ui.StandardCard(title=card_title,text=shop_name))
                     .response
                     )
 
@@ -204,7 +207,7 @@ class GoNextIntentHandler(AbstractRequestHandler):
                 return (
                     handler_input.response_builder
                     .speak(speak_output)
-                    .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
+                    .set_card(ui.StandardCard(title=card_title,text=shop_name))
                     .response
                     )
                         
@@ -214,7 +217,7 @@ class GoNextIntentHandler(AbstractRequestHandler):
             return (
                 handler_input.response_builder
                 .speak(speak_output)
-                .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
+                .set_card(ui.StandardCard(title=card_title,text=shop_name))
                 .ask(ask_output)
                 .set_should_end_session(False)
                 .response
