@@ -1,9 +1,8 @@
 import requests
 import json
-import math
-import os
-import apikey
 
+# ぐるなびAPIキー
+import apikey
 keyid = apikey.keyid
 
 class RestrantSearchApiParameter:
