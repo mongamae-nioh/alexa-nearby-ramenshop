@@ -6,7 +6,7 @@ import apikey
 keyid = apikey.keyid
 
 class RestrantSearchApiParameter:
-    """レストラン検索APIリクエストのパラメータ"""
+    """レストラン検索APIのリクエストパラメータ作成"""
     def __init__(self):
         self._url = "https://api.gnavi.co.jp/RestSearchAPI/v3/"
         self._keyid = keyid
@@ -27,7 +27,7 @@ class RestrantSearchApiParameter:
         return parameter
 
 class ReputationSearchApiParameter:
-    """口コミAPIリクエストのパラメータ"""
+    """口コミAPIのリクエストパラメータ作成"""
     def __init__(self):
         self._url = "https://api.gnavi.co.jp/PhotoSearchAPI/v3/"
         self._keyid = keyid
@@ -50,7 +50,7 @@ class ReputationSearchApiParameter:
 class GeoLocation:
     """位置情報のパラメータ"""
     @classmethod
-    def set(self, latitude, longitude):
+    def set(cls, latitude, longitude):
         geolocation = {}
         geolocation['latitude'] = latitude
         geolocation['longitude'] = longitude
@@ -60,7 +60,7 @@ class GeoLocation:
 class SearchRange:
     """検索範囲のパラメータ 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m"""
     @classmethod
-    def set(self, num):
+    def set(cls, num):
         range = {}
         range['range'] = num
 
@@ -69,7 +69,7 @@ class SearchRange:
 class ApiRequestParameter:
     """APIリクエストのパラメータとして使うために複数の辞書をマージ"""
     @classmethod
-    def merge(self, *args):
+    def merge(cls, *args):
         parameter = {}
 
         for i in args:
@@ -116,7 +116,7 @@ class ShopName(ApiRequest):
         return official_name
 
 class ReputationInfo(ApiRequest):
-    """状態遷移をセッションアトリビュートで管理するためAPIからのレスポンスをDynamoDBへ格納する"""
+    """状態遷移をセッションアトリビュートで管理するためAPIからのレスポンスをDynamoDBへ格納するデータを作成"""
     def __init__(self, url, param):
         super().__init__(url, param)
 
