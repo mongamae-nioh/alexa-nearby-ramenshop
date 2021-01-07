@@ -27,6 +27,9 @@ search_menu = 'ラーメン'
 # 一度の発話で紹介する口コミの数（あまり長いとUXを損ねるため）
 referrals_at_once = 2
 
+# カードに表示する店名一覧
+shop_name = ''
+
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
     def can_handle(self, handler_input):
@@ -35,6 +38,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         return ask_utils.is_request_type("LaunchRequest")(handler_input)
 
     def handle(self, handler_input):
+        global shop_name
         # type: (HandlerInput) -> Response     
         # デバイスが位置情報取得に対応しているか、Alexaアプリが位置情報の共有を許可しているかチェック
         context = handler_input.request_envelope.context
@@ -89,12 +93,11 @@ class LaunchRequestHandler(AbstractRequestHandler):
             speak_output = 'すみません。お店の口コミは見つかりませんでした。'
             return (handler_input.response_builder.speak(speak_output).response)
 
-        shop_name = ''
         if session_attr['remaining_reputations'] <= referrals_at_once:
             session_attr['next_pages'] = 'no'
-            
+
             for i in range(session_attr['remaining_reputations']):
-                shop_name    += '・' + shop_reputation[i]['name'] \
+                shop_name     = '・' + shop_reputation[i]['name'] \
                                 + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
                 speak_output += shop_reputation[i]['kana'] + '。' \
                                 + shop_reputation[i]['comment'] \
@@ -104,15 +107,19 @@ class LaunchRequestHandler(AbstractRequestHandler):
             return (
                 handler_input.response_builder
                 .speak(speak_output)
-                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
                 .response
                 )
 
         else:
             speak_output += 'いくつかをご紹介します。'
-            for i in range(referrals_at_once):
+            # お店の一覧を画面へ表示する
+            for i in range(session_attr['remaining_reputations']):
                 shop_name    += '・' + shop_reputation[i]['name'] \
                                 + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
+
+            # 一回の発話でお知らせするお店
+            for i in range(referrals_at_once):
                 speak_output += shop_reputation[i]['kana'] + '。' \
                                 + shop_reputation[i]['comment'] \
                                 + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
@@ -129,7 +136,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
             return (
                 handler_input.response_builder
                 .speak(speak_output)
-                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
                 .ask(ask_output)
                 .set_should_end_session(False)
                 .response
@@ -168,8 +175,6 @@ class GoNextIntentHandler(AbstractRequestHandler):
                 speak_output += "これが最後の口コミです。"
                 
             if session_attr['remaining_reputations'] == 1:
-                shop_name    += '・' + shopinfo[str(start)]['name'] + '(' \
-                                + str(shopinfo[str(start)]['distance']) + 'm)' + '\n'
                 speak_output += shopinfo[str(start)]['kana'] + '。' \
                                 + shopinfo[str(start)]['comment'] \
                                 + 'お店まではここから約' + str(shopinfo[str(start)]['distance']) + 'メートルです。' \
@@ -178,13 +183,11 @@ class GoNextIntentHandler(AbstractRequestHandler):
                 return (
                     handler_input.response_builder
                     .speak(speak_output)
-                    .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                    .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
                     .response
                     )
 
             for i in range(start, end):
-                shop_name    += '・' + shopinfo[str(i)]['name'] + '(' \
-                                + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
                 speak_output += shopinfo[str(i)]['kana'] + '。' \
                                 + shopinfo[str(i)]['comment'] \
                                 + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。' \
@@ -197,10 +200,11 @@ class GoNextIntentHandler(AbstractRequestHandler):
 
             if session_attr['remaining_reputations'] <= 0:
                 speak_output += "口コミは以上です。"
+
                 return (
                     handler_input.response_builder
                     .speak(speak_output)
-                    .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                    .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
                     .response
                     )
                         
@@ -210,7 +214,7 @@ class GoNextIntentHandler(AbstractRequestHandler):
             return (
                 handler_input.response_builder
                 .speak(speak_output)
-                .set_card(ui.StandardCard(title="検索結果",text=shop_name))
+                .set_card(ui.StandardCard(title="今回紹介したお店と現在地からの距離",text=shop_name))
                 .ask(ask_output)
                 .set_should_end_session(False)
                 .response
