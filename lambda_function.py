@@ -12,11 +12,7 @@ from ask_sdk_core.dispatch_components import AbstractRequestHandler
 from ask_sdk_core.dispatch_components import AbstractExceptionHandler
 from ask_sdk_core.handler_input import HandlerInput
 from ask_sdk_model import ui
-#from ask_sdk_model.ui import AskForPermissionsConsentCard
-
 from ask_sdk_model import Response
-
-#import shopinfo
 from shopinfo import ReputationSearchApiParameter,GeoLocation,SearchRange,ApiRequestParameter,ReputationInfo
 
 logger = logging.getLogger(__name__)
@@ -75,8 +71,9 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
         hitcount = api_response.total_hits
         shop_reputation = api_response.reputation_search()
-                
-        if shop_reputation:
+        return_code = api_response.return_code()
+
+        if shop_reputation and return_code == 200: # APIリクエストが正常終了
             speak_output = f"{hitcount}件の口コミが見つかりました。"
         else:
             speak_output = 'すみません。お店の口コミは見つかりませんでした。'
