@@ -22,14 +22,14 @@ from shopinfo import ReputationSearchApiParameter,GeoLocation,SearchRange,ApiReq
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# 一度の発話で紹介する口コミの数（あまり長いとUXを損ねるため）
-referrals_at_once = 2
-
-# 位置情報の共有を許可するよう促すカードを表示する関数の引数
+# 位置情報の共有を許可するように促すカードをAlexaアプリへ表示する関数の引数
 permissions = ["alexa::devices:all:geolocation:read"]
 
-# 何のお店を探すか
+# 探したいメニュー名
 search_menu = 'ラーメン'
+
+# 一度の発話で紹介する口コミの数（あまり長いとUXを損ねるため）
+referrals_at_once = 2
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
@@ -43,11 +43,11 @@ class LaunchRequestHandler(AbstractRequestHandler):
         # デバイスが位置情報取得に対応しているか、Alexaアプリが位置情報の共有を許可しているかチェック
         context = handler_input.request_envelope.context
         isgeosupported = context.system.device.supported_interfaces.geolocation
-        getobject = context.geolocation
-        if isgeosupported is None or getobject is None:
+        geo_object = context.geolocation
+        if isgeosupported is None or geo_object is None:
             speak_output = "このスキルは、位置情報を使用します。\
                 位置情報の共有を有効にするには、Alexaアプリに移動し、権限を有効にしてください。\
-                なお、固定デバイスの場合は位置情報を取得するようには設定されていないため、このスキルを使うことはできません。"
+                なお、固定デバイスの場合は位置情報を取得するようには設定されていないため、このスキルはお使いになれません。"
             
             return (
                 handler_input.response_builder
@@ -56,7 +56,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
                 .response
             )
 
-        # APIへリクエストするときのパラメータ作成
+        # APIのリクエストパラメータ作成
         api = ReputationSearchApiParameter()
 
         menu = api.search_by_menu(search_menu)
@@ -69,32 +69,31 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
         parameter = ApiRequestParameter.merge(menu, geolocation, radius)
 
-        # APIから取得
+        # APIレスポンス
         url = api.url
         api_response = ReputationInfo(url, parameter)
 
         hitcount = api_response.total_hits
         shop_reputation = api_response.reputation_search()
-        
-        session_attr = handler_input.attributes_manager.session_attributes
-        session_attr['shopinfo'] = shop_reputation
-        session_attr['remaining_reputations'] = len(shop_reputation)
-        
+                
         if shop_reputation:
             speak_output = f"{hitcount}件の口コミが見つかりました。"
         else:
             speak_output = 'すみません。お店の口コミは見つかりませんでした。'
             return (handler_input.response_builder.speak(speak_output).response)
 
+        session_attr = handler_input.attributes_manager.session_attributes
+        session_attr['shopinfo'] = shop_reputation
+        session_attr['remaining_reputations'] = len(shop_reputation)
         session_attr['shop_index_begin'] = 0
-        shop_name = ''
 
+        shop_name = ''
         if session_attr['remaining_reputations'] <= referrals_at_once:
             session_attr['next_pages'] = 'no'
             
             for i in range(session_attr['remaining_reputations']):
-                shop_name    += '・' + shop_reputation[i]['name'] + '(' \
-                                + str(shop_reputation[i]['distance']) + 'm)' + '\n'
+                shop_name    += '・' + shop_reputation[i]['name'] \
+                                + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
                 speak_output += shop_reputation[i]['kana'] + '。' \
                                 + shop_reputation[i]['comment'] \
                                 + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
@@ -110,8 +109,8 @@ class LaunchRequestHandler(AbstractRequestHandler):
         else:
             speak_output += 'いくつかをご紹介します。'
             for i in range(referrals_at_once):
-                shop_name    += '・' + shop_reputation[i]['name'] + '(' \
-                                + str(shop_reputation[i]['distance']) + 'm)' + '\n'
+                shop_name    += '・' + shop_reputation[i]['name'] \
+                                + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
                 speak_output += shop_reputation[i]['kana'] + '。' \
                                 + shop_reputation[i]['comment'] \
                                 + 'お店までの距離はここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
@@ -182,8 +181,8 @@ class GoNextIntentHandler(AbstractRequestHandler):
                     )
 
             for i in range(start, end):
-                shop_name    += '・' + shopinfo[str(i)]['name'] + '(' \
-                                + str(shopinfo[str(i)]['distance']) + 'm)' + '\n'
+                shop_name    += '・' + shop_reputation[i]['name'] \
+                                + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
                 speak_output += shopinfo[str(i)]['kana'] + '。' \
                                 + shopinfo[str(i)]['comment'] \
                                 + 'お店まではここから約' + str(shopinfo[str(i)]['distance']) + 'メートルです。' \
