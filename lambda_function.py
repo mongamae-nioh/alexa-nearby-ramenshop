@@ -86,12 +86,12 @@ class LaunchRequestHandler(AbstractRequestHandler):
         if return_code == 200: # APIリクエストが正常終了
             shop_reputation = api_response.reputation_search()
             hitcount = api_response.total_hits
+            speak_output = f"{hitcount}件の口コミが見つかりました。"
 
             session_attr = handler_input.attributes_manager.session_attributes
             session_attr['shopinfo'] = shop_reputation
             session_attr['remaining_reputations'] = len(shop_reputation)
             session_attr['shop_index_begin'] = 0
-            speak_output = f"{hitcount}件の口コミが見つかりました。"
         else:
             speak_output = 'すみません。お店の口コミは見つかりませんでした。'
             return (handler_input.response_builder.speak(speak_output).response)
@@ -113,7 +113,6 @@ class LaunchRequestHandler(AbstractRequestHandler):
                 .set_card(ui.StandardCard(title=card_title,text=shop_name))
                 .response
                 )
-
         else:
             speak_output += 'いくつかをご紹介します。'
             # お店の一覧を画面へ表示する
@@ -133,6 +132,8 @@ class LaunchRequestHandler(AbstractRequestHandler):
             session_attr['shop_index_end'] = session_attr['shop_index_begin'] + referrals_at_once
             session_attr['remaining_reputations'] -= referrals_at_once
             speak_output += "次の口コミを聞きますか？"
+
+            session_attr['repeat_speakoutput'] = speak_output 
 
             ask_output = "そのほかの口コミを聞きますか？"
 
@@ -171,7 +172,6 @@ class GoNextIntentHandler(AbstractRequestHandler):
         start = session_attr['shop_index_begin']
         end = session_attr['shop_index_end']
         speak_output = ''
-        shop_name = ''
 
         if session_attr['next_pages'] == 'yes' and session_attr['remaining_reputations'] > 0:
             if 0 < session_attr['remaining_reputations'] <= referrals_at_once:
@@ -200,6 +200,7 @@ class GoNextIntentHandler(AbstractRequestHandler):
 
             session_attr['shop_index_end'] = session_attr['shop_index_begin'] + referrals_at_once
             session_attr['remaining_reputations'] -= referrals_at_once
+            session_attr['repeat_speakoutput'] = speak_output 
 
             if session_attr['remaining_reputations'] <= 0:
                 speak_output += "口コミは以上です。"
@@ -212,6 +213,8 @@ class GoNextIntentHandler(AbstractRequestHandler):
                     )
                         
             speak_output += "次の口コミを聞きますか？"
+            session_attr['repeat_speakoutput'] = speak_output 
+
             ask_output = "そのほかの口コミを聞きますか？"
 
             return (
@@ -225,6 +228,25 @@ class GoNextIntentHandler(AbstractRequestHandler):
         else:
             speak_output = 'すみません。よくわかりませんでした。'
             return (handler_input.response_builder.speak(speak_output).response)
+
+class RepeatIntentHandler(AbstractRequestHandler):
+    """「もう一回」で呼び出され直前の内容を再度発話するインテント"""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return (ask_utils.is_intent_name("AMAZON.RepeatIntent")(handler_input))
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        session_attr = handler_input.attributes_manager.session_attributes
+        speak_output = session_attr['repeat_speakoutput']
+
+        return (
+            handler_input.response_builder
+            .speak(speak_output)
+            .set_card(ui.StandardCard(title=card_title,text=shop_name))
+            .set_should_end_session(False)
+            .response
+            )
 
 class NoIntentHandler(AbstractRequestHandler):
     """No Intent."""
@@ -305,6 +327,7 @@ sb = SkillBuilder()
 
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(GoNextIntentHandler())
+sb.add_request_handler(RepeatIntentHandler())
 sb.add_request_handler(NoIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
