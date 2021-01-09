@@ -67,7 +67,7 @@ class SearchRange:
         return range
     
 class ApiRequestParameter:
-    """APIリクエストのパラメータとして使うために複数の辞書をマージ"""
+    """複数の辞書をマージ、APIリクエストのパラメータとして使う"""
     @classmethod
     def merge(cls, *args):
         parameter = {}
@@ -116,7 +116,8 @@ class ShopName(ApiRequest):
         return official_name
 
 class ReputationInfo(ApiRequest):
-    """状態遷移をセッションアトリビュートで管理するためAPIからのレスポンスをDynamoDBへ格納するデータを作成"""
+    """複数のインテントを横断するデータはセッションアトリビュートで管理する"""
+    """APIからのレスポンスをDynamoDBへ格納するデータを作成する"""
     def __init__(self, url, param):
         super().__init__(url, param)
 
@@ -139,13 +140,9 @@ class ReputationInfo(ApiRequest):
             for i in range(per_page):
                 temp_reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
-                        "shop_id": shop_data[str(i)]['photo']['shop_id'],
                         "kana": self.official_shop_name(shop_data[str(i)]['photo']['shop_id']),
-                        "menu": shop_data[str(i)]['photo']['menu_name'],
                         "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
-                        "score": shop_data[str(i)]['photo']['total_score'],
-                        "distance": shop_data[str(i)]['photo']['distance'],
-                        "url": shop_data[str(i)]['photo']['shop_url']
+                        "distance": shop_data[str(i)]['photo']['distance']
                     }
                 })
             page += 1
@@ -158,13 +155,9 @@ class ReputationInfo(ApiRequest):
             for i in range(remaining):
                 temp_reputation_info.update({
                     shop_data[str(i)]['photo']['shop_name']: { 
-                        "menu": shop_data[str(i)]['photo']['menu_name'],
-                        "shop_id": shop_data[str(i)]['photo']['shop_id'],
                         "kana": self.official_shop_name(shop_data[str(i)]['photo']['shop_id']),
                         "comment": shop_data[str(i)]['photo']['comment'].replace('\r\n', ''),
-                        "score": shop_data[str(i)]['photo']['total_score'],
-                        "distance": shop_data[str(i)]['photo']['distance'],
-                        "url": shop_data[str(i)]['photo']['shop_url']
+                        "distance": shop_data[str(i)]['photo']['distance']
                     }
                 })
                 
@@ -174,12 +167,9 @@ class ReputationInfo(ApiRequest):
             reputation_info.update({
                 index: {
                     "name": i,
-                    "shop_id": j['shop_id'],
                     "kana": j['kana'],
-                    "menu": j['menu'],
                     "comment": j['comment'],
-                    "distance": j['distance'],
-                    "url": j['url']
+                    "distance": j['distance']
                     }
                 }
             )
