@@ -27,6 +27,9 @@ card_title = "紹介したお店と現在地からの距離"
 # 探したいメニュー
 search_menu = 'ラーメン'
 
+# 検索範囲 緯度/経度からの検索範囲(半径) 1:300m、2:500m、3:1000m、4:2000m、5:3000m
+search_range = 4
+
 # 一度の発話で紹介する口コミの数
 referrals_at_once = 2
 
@@ -69,7 +72,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         longitude = context.geolocation.coordinate.longitude_in_degrees
         geolocation = GeoLocation.set(latitude, longitude)
 
-        radius = SearchRange.set(5) # 3000m
+        radius = SearchRange.set(search_range) # 2000m
 
         parameter = ApiRequestParameter.merge(menu, geolocation, radius)
 
@@ -78,7 +81,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         api_response = ReputationInfo(url, parameter)
         return_code = api_response.return_code()
 
-        if return_code == 200: # お店がヒットしたら
+        if return_code == 200: # 検索でお店がヒットしたら
             shop_reputation = api_response.reputation_search()
             hitcount = api_response.total_hits
             speak_output = f"{hitcount}件の口コミが見つかりました。"
@@ -99,8 +102,9 @@ class LaunchRequestHandler(AbstractRequestHandler):
                                 + '(' + str(shop_reputation[i]['distance']) + 'm)' + '\n'
                 speak_output += shop_reputation[i]['kana'] + '。' \
                                 + shop_reputation[i]['comment'] \
-                                + 'お店まではここから約' + str(shop_reputation[i]['distance']) + 'メートルです。' \
-                                + '口コミは以上です。' 
+                                + 'お店まではここから約' + str(shop_reputation[i]['distance']) + 'メートルです。'
+
+            speak_output += '口コミは以上です。'
 
             return (
                 handler_input.response_builder
