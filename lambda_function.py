@@ -59,7 +59,6 @@ class LaunchRequestHandler(AbstractRequestHandler):
             return (
                 handler_input.response_builder
                 .speak(speak_output)
-                .set_card(ui.AskForPermissionsConsentCard(permissions=permissions))
                 .response
             )
 
