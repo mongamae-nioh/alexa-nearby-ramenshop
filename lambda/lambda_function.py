@@ -15,6 +15,9 @@ from ask_sdk_model import ui
 from ask_sdk_model import Response
 from shopinfo import ReputationSearchApiParameter,GeoLocation,SearchRange,ApiRequestParameter,ReputationInfo
 
+import handlers.HelpIntentHandler
+import env.env
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -144,16 +147,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
                 .response
                 )
 
-class HelpIntentHandler(AbstractRequestHandler):
-    """Handler for Help Intent."""
-    def can_handle(self, handler_input):
-        # type: (HandlerInput) -> bool
-        return ask_utils.is_intent_name("AMAZON.HelpIntent")(handler_input)
-
-    def handle(self, handler_input):
-        # type: (HandlerInput) -> Response
-        speak_output = f"現在地から近い{search_menu}屋さんの口コミをご紹介します。"
-        return (handler_input.response_builder.speak(speak_output).response)
+helpintent = handlers.HelpIntentHandler()
 
 class GoNextIntentHandler(AbstractRequestHandler):
     """店の情報を読み上げている途中で「次」、あるいは次の店の情報を聞くかという質問に「はい」と答えたときに呼び出されるインテント"""
@@ -327,7 +321,8 @@ sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(GoNextIntentHandler())
 sb.add_request_handler(RepeatIntentHandler())
 sb.add_request_handler(NoIntentHandler())
-sb.add_request_handler(HelpIntentHandler())
+#sb.add_request_handler(HelpIntentHandler())
+sb.add_request_handler(helpintent)
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
 sb.add_request_handler(IntentReflectorHandler()) # make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
